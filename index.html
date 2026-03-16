@@ -2045,6 +2045,7 @@ function renderMerch() {
           <span class="badge badge-${isVenda ? 'saida-tx' : 'entrada-tx'}">${l.tipo}</span>
           <span>${l.produto}</span>
           <span style="color:var(--text-muted)">× ${l.qty}</span>
+          <button class="btn btn-outline btn-sm" style="margin-left:auto;padding:2px 7px;font-size:10px;color:var(--red-bright);border-color:rgba(192,57,43,0.3)" onclick="deleteMerchLog(${l.id},'${l.tipo}',${JSON.stringify(l.produto)},${l.qty})">apagar</button>
         </div>
       `;
     }).join('');
@@ -2182,9 +2183,11 @@ function renderSocial() {
           <button class="btn-publish" style="font-size:11px;padding:3px 8px" onclick="togglePublicado(${p.id})">
             ${p.publicado ? '✓' : 'Publicar'}
           </button>
+          <button class="btn btn-outline btn-sm" style="padding:3px 7px;font-size:11px" onclick="startEditPost(${p.id})" title="Editar">✎</button>
           <button class="btn btn-outline btn-sm" style="padding:3px 7px;font-size:11px" onclick="deletePost(${p.id})">×</button>
         </div>
       </div>
+      ${editingPostId === p.id ? `<div style="grid-column:1/-1">${editPostForm(p)}</div>` : ''}
       `;
     }).join('');
   } else {
@@ -2208,9 +2211,11 @@ function renderSocial() {
               <div class="member-dot" style="width:16px;height:16px;font-size:8px">${p.membro[0]}</div>
               <span>${p.membro}</span>
             </div>
+            <button class="btn btn-outline btn-sm" style="padding:3px 7px;font-size:11px" onclick="startEditPost(${p.id})" title="Editar">✎</button>
             <button class="btn btn-outline btn-sm" style="padding:3px 7px;font-size:11px" onclick="deletePost(${p.id})">×</button>
           </div>
         </div>
+        ${editingPostId === p.id ? editPostForm(p) : `
         <div class="post-card-body">
           <div class="post-date-row">
             <span class="post-date">${fmtDate(p.data)}</span>
@@ -2224,11 +2229,93 @@ function renderSocial() {
           <button class="btn-publish" onclick="togglePublicado(${p.id})">
             ${p.publicado ? '✓ Publicado' : 'Marcar publicado'}
           </button>
-        </div>
+        </div>`}
       </div>
       `;
     }).join('');
   }
+}
+
+// ============================================================
+// MERCH LOG DELETE
+// ============================================================
+async function deleteMerchLog(id, tipo, produto, qty) {
+  // Reverse stock effect
+  const p = products.find(p => p.nome === produto);
+  if (p) {
+    const delta = tipo === 'venda' ? qty : -qty; // venda → devolver; restock → retirar
+    const newStock = Math.max(0, p.stock + delta);
+    await sb.from('products').update({ stock: newStock }).eq('id', p.id);
+  }
+  await sb.from('merch_log').delete().eq('id', id);
+  showToast('Movimento apagado' + (p ? ' · stock ajustado' : ''));
+}
+
+// ============================================================
+// SOCIAL EDIT
+// ============================================================
+let editingPostId = null;
+
+function startEditPost(id) {
+  editingPostId = editingPostId === id ? null : id;
+  renderSocial();
+}
+
+async function savePost(id) {
+  const conta  = document.getElementById(`ep-conta-${id}`).value;
+  const tipo   = document.getElementById(`ep-tipo-${id}`).value;
+  const data   = document.getElementById(`ep-data-${id}`).value;
+  const hora   = document.getElementById(`ep-hora-${id}`).value;
+  const notas  = document.getElementById(`ep-notas-${id}`).value.trim();
+  const membro = document.getElementById(`ep-membro-${id}`).value;
+
+  if (!data) { showToast('Escolhe uma data'); return; }
+  await sb.from('posts').update({ conta, tipo, data, hora, notas, membro }).eq('id', id);
+  editingPostId = null;
+  showToast('Publicação actualizada');
+}
+
+function editPostForm(p) {
+  return `
+  <div style="padding:12px 14px;border-top:1px solid var(--border);background:var(--black3);display:flex;flex-direction:column;gap:8px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="form-group">
+        <label>Conta</label>
+        <select id="ep-conta-${p.id}">
+          <option value="mysticfyah" ${p.conta==='mysticfyah'?'selected':''}>@mysticfyah</option>
+          <option value="subciety"   ${p.conta==='subciety'  ?'selected':''}>@subciety</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Tipo</label>
+        <select id="ep-tipo-${p.id}">
+          ${['Reel','Post','Story','Carousel','Live'].map(t=>`<option ${p.tipo===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Data</label>
+        <input type="date" id="ep-data-${p.id}" value="${p.data}">
+      </div>
+      <div class="form-group">
+        <label>Hora</label>
+        <input type="time" id="ep-hora-${p.id}" value="${p.hora||''}">
+      </div>
+      <div class="form-group">
+        <label>Responsável</label>
+        <select id="ep-membro-${p.id}">
+          ${['Tito','Dubio','Berti'].map(m=>`<option ${p.membro===m?'selected':''}>${m}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Notas / Legenda</label>
+      <textarea id="ep-notas-${p.id}" rows="3" style="width:100%">${p.notas||''}</textarea>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary btn-sm" onclick="savePost(${p.id})">Guardar</button>
+      <button class="btn btn-outline btn-sm" onclick="startEditPost(${p.id})">Cancelar</button>
+    </div>
+  </div>`;
 }
 
 // ============================================================
