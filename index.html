@@ -1965,9 +1965,20 @@ async function quickSale() {
   const p   = products.find(p => p.id === pid);
   if (!p) { showToast('Selecciona um produto'); return; }
   if (p.stock < qty) { showToast(`Stock insuficiente (${p.stock} disponível)`); return; }
+
+  const valor = Number(p.preco) * qty;
+  const descricao = `Venda Merch — ${p.nome} ×${qty}`;
+
+  // Criar transação financeira e obter o id
+  const { data: txData } = await sb.from('transactions')
+    .insert({ descricao, cat: 'Merch', tipo: 'entrada', valor, data: today() })
+    .select('id').single();
+
+  const transaction_id = txData?.id || null;
+
   await sb.from('products').update({ stock: p.stock - qty }).eq('id', pid);
-  await sb.from('merch_log').insert({ tipo: 'venda', produto: p.nome, qty, data: today() });
-  showToast(`Venda registada — ${qty}× ${p.nome}`);
+  await sb.from('merch_log').insert({ tipo: 'venda', produto: p.nome, qty, data: today(), transaction_id });
+  showToast(`Venda registada — ${qty}× ${p.nome} · +${fmtCurrency(valor)} nas Finanças`);
 }
 
 async function addProduct() {
@@ -2240,15 +2251,22 @@ function renderSocial() {
 // MERCH LOG DELETE
 // ============================================================
 async function deleteMerchLog(id, tipo, produto, qty) {
-  // Reverse stock effect
+  const logEntry = merchLog.find(l => l.id === id);
+
+  // Reverter stock
   const p = products.find(p => p.nome === produto);
   if (p) {
-    const delta = tipo === 'venda' ? qty : -qty; // venda → devolver; restock → retirar
-    const newStock = Math.max(0, p.stock + delta);
-    await sb.from('products').update({ stock: newStock }).eq('id', p.id);
+    const delta = tipo === 'venda' ? qty : -qty;
+    await sb.from('products').update({ stock: Math.max(0, p.stock + delta) }).eq('id', p.id);
   }
+
+  // Apagar transação financeira ligada (se existir)
+  if (tipo === 'venda' && logEntry?.transaction_id) {
+    await sb.from('transactions').delete().eq('id', logEntry.transaction_id);
+  }
+
   await sb.from('merch_log').delete().eq('id', id);
-  showToast('Movimento apagado' + (p ? ' · stock ajustado' : ''));
+  showToast('Venda apagada · stock e finanças actualizados');
 }
 
 // ============================================================
