@@ -22,6 +22,7 @@
     --green-dim: #1a6e3f;
     --purple: #190039;
     --purple-bright: #3b0080;
+    --purple-accent: #b090e0;
     --text: #f0f0f0;
     --text-dim: #a8a8a8;
     --text-muted: #666666;
@@ -239,7 +240,7 @@
   .stat-card.warn::before { background: var(--orange); }
   .stat-card.danger::before { background: var(--red-bright); }
   .stat-card.merch::before { background: var(--purple-bright); }
-  .stat-card.merch .stat-value { color: #b090e0; }
+  .stat-card.merch .stat-value { color: var(--purple-accent); }
 
   .finance-split {
     display: grid;
@@ -274,10 +275,6 @@
   }
   .finance-split-cell .stat-label { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
   .finance-split-cell .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 22px; line-height: 1; letter-spacing: 0.04em; }
-  @media (max-width: 600px) {
-    .finance-split { grid-template-columns: 1fr; }
-    .finance-split-inner { grid-template-columns: repeat(3,1fr); }
-  }
 
   .stat-label {
     font-size: 9px;
@@ -373,7 +370,7 @@
 
   .member-tito  .member-dot { background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.3); }
   .member-dubio .member-dot { background: rgba(46,204,113,0.15); color: var(--green); border: 1px solid rgba(46,204,113,0.3); }
-  .member-berti .member-dot { background: rgba(25,0,57,0.6); color: #b090e0; border: 1px solid rgba(25,0,57,1); }
+  .member-berti .member-dot { background: rgba(25,0,57,0.6); color: var(--purple-accent); border: 1px solid rgba(25,0,57,1); }
 
   /* FORM */
   .form-panel {
@@ -1119,7 +1116,7 @@
     font-weight: 700;
   }
 
-  .type-reel    { background: rgba(25,0,57,0.5); color: #b090e0; border: 1px solid rgba(25,0,57,0.9); }
+  .type-reel    { background: rgba(25,0,57,0.5); color: var(--purple-accent); border: 1px solid rgba(25,0,57,0.9); }
   .type-post    { background: rgba(255,255,255,0.08); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); }
   .type-story   { background: rgba(46,204,113,0.1); color: var(--green); border: 1px solid rgba(46,204,113,0.25); }
   .type-carousel{ background: rgba(155,89,182,0.15); color: #bb8fce; border: 1px solid rgba(155,89,182,0.3); }
@@ -1178,7 +1175,7 @@
   .release-card:hover { border-color: var(--border-bright); transform: translateY(-1px); }
 
   .release-card.ideia       { border-left-color: var(--text-muted); }
-  .release-card.em-producao { border-left-color: #b090e0; }
+  .release-card.em-producao { border-left-color: var(--purple-accent); }
   .release-card.pronto      { border-left-color: #ffffff; }
   .release-card.lancado     { border-left-color: var(--green); }
 
@@ -1191,13 +1188,11 @@
   }
 
   .badge-ideia       { background: rgba(100,100,100,0.15); color: var(--text-muted); border: 1px solid rgba(100,100,100,0.2); }
-  .badge-em-producao { background: rgba(25,0,57,0.5); color: #b090e0; border: 1px solid rgba(25,0,57,0.9); }
+  .badge-em-producao { background: rgba(25,0,57,0.5); color: var(--purple-accent); border: 1px solid rgba(25,0,57,0.9); }
   .badge-pronto      { background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.3); }
   .badge-lancado     { background: rgba(46,204,113,0.12); color: var(--green); border: 1px solid rgba(46,204,113,0.3); }
 
-  .badge-em-planeamento { background: rgba(25,0,57,0.5); color: #b090e0; border: 1px solid rgba(25,0,57,0.9); }
-  .badge-confirmado-ev  { background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.3); }
-  .badge-realizado      { background: rgba(46,204,113,0.12); color: var(--green); border: 1px solid rgba(46,204,113,0.3); }
+  /* badge-em-planeamento → badge-em-producao, badge-confirmado-ev → badge-pronto, badge-realizado → badge-lancado */
 
   .obs-text {
     font-size: 11px;
@@ -1226,7 +1221,7 @@
   }
   .ev-org-row:hover { border-color: var(--border-bright); }
   .ev-org-row.ideia       { border-left-color: var(--text-muted); }
-  .ev-org-row.em-planeamento { border-left-color: #b090e0; }
+  .ev-org-row.em-planeamento { border-left-color: var(--purple-accent); }
   .ev-org-row.confirmado  { border-left-color: #ffffff; }
   .ev-org-row.realizado   { border-left-color: var(--green); }
 
@@ -1893,7 +1888,7 @@ async function loadTable(table) {
 
 async function loadAll() {
   showLoading(true);
-  const [ev, tk, tx, dv, ab, pr, ml, po] = await Promise.all([
+  const [ev, tk, tx, dv, ab, pr, ml, po, rl, oe] = await Promise.all([
     sb.from('events').select('*').order('data'),
     sb.from('tasks').select('*').order('created_at'),
     sb.from('transactions').select('*').order('created_at', { ascending: false }),
@@ -1902,6 +1897,8 @@ async function loadAll() {
     sb.from('products').select('*').order('nome'),
     sb.from('merch_log').select('*').order('created_at', { ascending: false }),
     sb.from('posts').select('*').order('data'),
+    sb.from('releases').select('*').order('created_at', { ascending: false }),
+    sb.from('org_events').select('*').order('created_at', { ascending: false }),
   ]);
   events       = ev.data || [];
   tasks        = (tk.data || []).map(mapTask);
@@ -1911,13 +1908,8 @@ async function loadAll() {
   products     = pr.data || [];
   merchLog     = ml.data || [];
   posts        = po.data || [];
-
-  const [rl, oe] = await Promise.all([
-    sb.from('releases').select('*').order('created_at', { ascending: false }),
-    sb.from('org_events').select('*').order('created_at', { ascending: false }),
-  ]);
-  releases  = rl.data || [];
-  orgEvents = oe.data || [];
+  releases     = rl.data || [];
+  orgEvents    = oe.data || [];
 
   renderAgenda(); renderTasks(); renderFinancas(); renderDividas(); renderMerch(); renderSocial(); renderReleases(); renderOrgEvents();
   showLoading(false);
@@ -2152,40 +2144,38 @@ function renderTasks() {
 
       if (isEditing) {
         html += `
-        <div class="task-row" style="flex-direction:column;align-items:stretch;cursor:default;gap:8px">
-          <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="task-row" style="flex-direction:column;align-items:stretch;cursor:default;gap:6px">
+          <div class="form-group" style="margin:0">
+            <label>Descrição</label>
+            <input type="text" id="tk-d-${t.id}" value="${t.desc.replace(/"/g,'&quot;')}">
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
             <div class="form-group" style="margin:0">
-              <label>Descrição</label>
-              <input type="text" id="tk-d-${t.id}" value="${t.desc.replace(/"/g,'&quot;')}">
-            </div>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
-              <div class="form-group" style="margin:0">
-                <label>Responsável</label>
-                <select id="tk-m-${t.id}">
-                  ${['Tito','Dubio','Berti'].map(m=>`<option ${t.membro===m?'selected':''}>${m}</option>`).join('')}
-                </select>
-              </div>
-              <div class="form-group" style="margin:0">
-                <label>Prioridade</label>
-                <select id="tk-p-${t.id}">
-                  ${['Normal','Médio','Urgente'].map(p=>`<option ${t.prio===p?'selected':''}>${p}</option>`).join('')}
-                </select>
-              </div>
-              <div class="form-group" style="margin:0">
-                <label>Grupo</label>
-                <select id="tk-g-${t.id}">
-                  ${['Esta semana','A fazer'].map(g2=>`<option ${t.grupo===g2?'selected':''}>${g2}</option>`).join('')}
-                </select>
-              </div>
+              <label>Responsável</label>
+              <select id="tk-m-${t.id}">
+                ${['Tito','Dubio','Berti'].map(m=>`<option ${t.membro===m?'selected':''}>${m}</option>`).join('')}
+              </select>
             </div>
             <div class="form-group" style="margin:0">
-              <label>Observações</label>
-              <textarea id="tk-o-${t.id}" rows="2">${(t.observacoes||'').replace(/</g,'&lt;')}</textarea>
+              <label>Prioridade</label>
+              <select id="tk-p-${t.id}">
+                ${['Normal','Médio','Urgente'].map(p=>`<option ${t.prio===p?'selected':''}>${p}</option>`).join('')}
+              </select>
             </div>
-            <div style="display:flex;gap:8px">
-              <button class="btn btn-primary btn-sm" onclick="saveTask(${t.id},event)">Guardar</button>
-              <button class="btn btn-outline btn-sm" onclick="startEditTask(${t.id},event)">Cancelar</button>
+            <div class="form-group" style="margin:0">
+              <label>Grupo</label>
+              <select id="tk-g-${t.id}">
+                ${['Esta semana','A fazer'].map(g2=>`<option ${t.grupo===g2?'selected':''}>${g2}</option>`).join('')}
+              </select>
             </div>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label>Observações</label>
+            <textarea id="tk-o-${t.id}" rows="2">${(t.observacoes||'').replace(/</g,'&lt;')}</textarea>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary btn-sm" onclick="saveTask(${t.id},event)">Guardar</button>
+            <button class="btn btn-outline btn-sm" onclick="startEditTask(${t.id},event)">Cancelar</button>
           </div>
         </div>`;
       } else {
@@ -2254,20 +2244,22 @@ async function saveTx(id) {
   showToast('Movimento actualizado');
 }
 
+const TX_CATS = ['Cachê','Merch','Equipamento','Transporte','Produção','Outro'];
+
 function renderFinancas() {
-  const totalIn  = transactions.filter(t => t.tipo === 'entrada').reduce((s, t) => s + t.valor, 0);
-  const totalOut = transactions.filter(t => t.tipo === 'saida').reduce((s, t) => s + t.valor, 0);
+  const s = transactions.reduce((acc, t) => {
+    const v = t.valor, in_ = t.tipo === 'entrada';
+    acc.totalIn  += in_ ? v : 0;
+    acc.totalOut += in_ ? 0 : v;
+    if (t.cat === 'Merch') { acc.merchIn += in_ ? v : 0; acc.merchOut += in_ ? 0 : v; }
+    else                   { acc.somIn   += in_ ? v : 0; acc.somOut   += in_ ? 0 : v; }
+    return acc;
+  }, { totalIn:0, totalOut:0, somIn:0, somOut:0, merchIn:0, merchOut:0 });
+
+  const { totalIn, totalOut, somIn, somOut, merchIn, merchOut } = s;
   const balance  = totalIn - totalOut;
-
-  const somTx     = transactions.filter(t => t.cat !== 'Merch');
-  const somIn     = somTx.filter(t => t.tipo === 'entrada').reduce((s, t) => s + t.valor, 0);
-  const somOut    = somTx.filter(t => t.tipo === 'saida').reduce((s, t) => s + t.valor, 0);
-  const somBal    = somIn - somOut;
-
-  const merchTx   = transactions.filter(t => t.cat === 'Merch');
-  const merchIn   = merchTx.filter(t => t.tipo === 'entrada').reduce((s, t) => s + t.valor, 0);
-  const merchOut  = merchTx.filter(t => t.tipo === 'saida').reduce((s, t) => s + t.valor, 0);
-  const merchBal  = merchIn - merchOut;
+  const somBal   = somIn - somOut;
+  const merchBal = merchIn - merchOut;
 
   const statsEl = document.getElementById('finance-stats');
   statsEl.innerHTML = `
@@ -2295,7 +2287,7 @@ function renderFinancas() {
         <div class="finance-split-inner">
           <div class="finance-split-cell">
             <div class="stat-label">Saldo</div>
-            <div class="stat-value" style="font-size:22px;${somBal < 0 ? 'color:var(--red-bright)' : ''}">${fmtCurrency(somBal)}</div>
+            <div class="stat-value" style="font-size:22px;color:${somBal < 0 ? 'var(--red-bright)' : 'var(--text)'}">${fmtCurrency(somBal)}</div>
           </div>
           <div class="finance-split-cell">
             <div class="stat-label">Entradas</div>
@@ -2314,7 +2306,7 @@ function renderFinancas() {
         <div class="finance-split-inner">
           <div class="finance-split-cell">
             <div class="stat-label">Saldo</div>
-            <div class="stat-value" style="font-size:22px;color:#b090e0;${merchBal < 0 ? 'color:var(--red-bright)' : ''}">${fmtCurrency(merchBal)}</div>
+            <div class="stat-value" style="font-size:22px;color:${merchBal < 0 ? 'var(--red-bright)' : 'var(--purple-accent)'}">${fmtCurrency(merchBal)}</div>
           </div>
           <div class="finance-split-cell">
             <div class="stat-label">Entradas</div>
@@ -2331,7 +2323,6 @@ function renderFinancas() {
 
   const body = document.getElementById('tx-body');
   const sorted = [...transactions].sort((a, b) => b.data.localeCompare(a.data));
-  const TX_CATS = ['Cachê','Merch','Equipamento','Transporte','Produção','Outro'];
   body.innerHTML = sorted.map(t => {
     const isEditingT = editingTxId === t.id;
     if (isEditingT) {
@@ -2478,7 +2469,7 @@ function renderDividas() {
     ? `${totalPendente} por saldar · ${fmtCurrency(total)} em dívida`
     : 'Tudo saldado';
 
-  const memberColors = { Tito: '#ffffff', Dubio: 'var(--green)', Berti: '#b090e0' };
+  const memberColors = { Tito: '#ffffff', Dubio: 'var(--green)', Berti: 'var(--purple-accent)' };
 
   statsEl.innerHTML = members.map(m => {
     const owed = dividas.filter(d => d.credor === m).reduce((s, d) => s + (d.valor - d.pago), 0);
@@ -3176,7 +3167,7 @@ function renderReleases() {
 // EVENTOS ORGANIZADOS
 // ============================================================
 const EV_STATE_CLS   = { 'Ideia':'ideia', 'Em Planeamento':'em-planeamento', 'Confirmado':'confirmado', 'Realizado':'realizado' };
-const EV_BADGE_CLS   = { 'Ideia':'badge-ideia', 'Em Planeamento':'badge-em-planeamento', 'Confirmado':'badge-confirmado-ev', 'Realizado':'badge-realizado' };
+const EV_BADGE_CLS   = { 'Ideia':'badge-ideia', 'Em Planeamento':'badge-em-producao', 'Confirmado':'badge-pronto', 'Realizado':'badge-lancado' };
 const EV_STATE_ORDER = { 'Confirmado':0, 'Em Planeamento':1, 'Ideia':2, 'Realizado':3 };
 
 let editingEventId = null;
