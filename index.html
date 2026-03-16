@@ -1310,6 +1310,47 @@
 
   /* number formatting helper */
   .num { font-variant-numeric: tabular-nums; }
+
+  /* TASK ATTACHMENTS */
+  .task-attachments {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .attachment-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .attachment-item a {
+    color: var(--text-dim);
+    text-decoration: none;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .attachment-item a:hover { color: var(--text); text-decoration: underline; }
+  .attachment-icon { font-size: 13px; flex-shrink: 0; }
+  .attachment-upload {
+    display: none;
+    margin-top: 6px;
+    align-items: center;
+    gap: 6px;
+  }
+  .attachment-upload.open { display: flex; }
+  .attachment-upload input[type=file] {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    flex: 1;
+    min-width: 0;
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1838,6 +1879,7 @@ const sb = createClient(
 // ============================================================
 let events = [], tasks = [], transactions = [], dividas = [], abonoLog = [];
 let products = [], merchLog = [], posts = [], releases = [], orgEvents = [];
+let taskAttachments = []; // { id, task_id, nome, url }
 
 const MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
@@ -1882,13 +1924,14 @@ async function loadTable(table) {
     case 'merch_log':    { const { data } = await q('merch_log','created_at', false);         merchLog     = data || [];                          renderMerch();    break; }
     case 'posts':      { const { data } = await q('posts','data');                         posts      = data || [];      renderSocial();   break; }
     case 'releases':   { const { data } = await q('releases','created_at', false);         releases   = data || [];      renderReleases(); break; }
-    case 'org_events': { const { data } = await q('org_events','created_at', false);       orgEvents  = data || [];      renderOrgEvents();break; }
+    case 'org_events':        { const { data } = await q('org_events','created_at', false);        orgEvents        = data || [];      renderOrgEvents(); break; }
+    case 'task_attachments':  { const { data } = await q('task_attachments','created_at', false);  taskAttachments  = data || [];      renderTasks();     break; }
   }
 }
 
 async function loadAll() {
   showLoading(true);
-  const [ev, tk, tx, dv, ab, pr, ml, po, rl, oe] = await Promise.all([
+  const [ev, tk, tx, dv, ab, pr, ml, po, rl, oe, ta] = await Promise.all([
     sb.from('events').select('*').order('data'),
     sb.from('tasks').select('*').order('created_at'),
     sb.from('transactions').select('*').order('created_at', { ascending: false }),
@@ -1899,24 +1942,26 @@ async function loadAll() {
     sb.from('posts').select('*').order('data'),
     sb.from('releases').select('*').order('created_at', { ascending: false }),
     sb.from('org_events').select('*').order('created_at', { ascending: false }),
+    sb.from('task_attachments').select('*').order('created_at', { ascending: false }),
   ]);
-  events       = ev.data || [];
-  tasks        = (tk.data || []).map(mapTask);
-  transactions = (tx.data || []).map(mapTx);
-  dividas      = (dv.data || []).map(mapDv);
-  abonoLog     = (ab.data || []).map(mapAb);
-  products     = pr.data || [];
-  merchLog     = ml.data || [];
-  posts        = po.data || [];
-  releases     = rl.data || [];
-  orgEvents    = oe.data || [];
+  events           = ev.data || [];
+  tasks            = (tk.data || []).map(mapTask);
+  transactions     = (tx.data || []).map(mapTx);
+  dividas          = (dv.data || []).map(mapDv);
+  abonoLog         = (ab.data || []).map(mapAb);
+  products         = pr.data || [];
+  merchLog         = ml.data || [];
+  posts            = po.data || [];
+  releases         = rl.data || [];
+  orgEvents        = oe.data || [];
+  taskAttachments  = ta.data || [];
 
   renderAgenda(); renderTasks(); renderFinancas(); renderDividas(); renderMerch(); renderSocial(); renderReleases(); renderOrgEvents();
   showLoading(false);
 }
 
 function setupRealtime() {
-  const tables = ['events','tasks','transactions','dividas','abono_log','products','merch_log','posts','releases','org_events'];
+  const tables = ['events','tasks','transactions','dividas','abono_log','products','merch_log','posts','releases','org_events','task_attachments'];
   const ch = sb.channel('db-realtime');
   tables.forEach(t => ch.on('postgres_changes', { event: '*', schema: 'public', table: t }, () => loadTable(t)));
   ch.subscribe();
@@ -2179,20 +2224,40 @@ function renderTasks() {
           </div>
         </div>`;
       } else {
+        const atts = taskAttachments.filter(a => a.task_id === t.id);
+        const attHtml = atts.length ? `
+          <div class="task-attachments" onclick="event.stopPropagation()">
+            ${atts.map(a => `
+              <div class="attachment-item">
+                <span class="attachment-icon">${attachIcon(a.nome)}</span>
+                <a href="${a.url}" target="_blank" rel="noopener">${a.nome}</a>
+                <button class="btn btn-outline btn-sm" style="padding:1px 6px;font-size:10px;color:var(--red-bright);border-color:rgba(192,57,43,0.3);flex-shrink:0" onclick="deleteAttachment(${a.id},'${a.url}')">×</button>
+              </div>`).join('')}
+          </div>` : '';
+
         html += `
-        <div class="task-row ${t.done ? 'done' : ''}" onclick="toggleTask(${t.id})">
-          <div class="task-check">${t.done ? '✓' : ''}</div>
-          <div style="flex:1;min-width:0">
-            <div class="task-text">${t.desc}</div>
-            ${t.observacoes ? `<div class="obs-text" style="margin-top:3px;font-size:11px;color:var(--text-muted)">${t.observacoes}</div>` : ''}
+        <div class="task-row ${t.done ? 'done' : ''}" onclick="toggleTask(${t.id})" style="flex-direction:column;align-items:stretch;cursor:pointer">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="task-check">${t.done ? '✓' : ''}</div>
+            <div style="flex:1;min-width:0">
+              <div class="task-text">${t.desc}</div>
+              ${t.observacoes ? `<div class="obs-text" style="margin-top:3px;font-size:11px;color:var(--text-muted)">${t.observacoes}</div>` : ''}
+            </div>
+            <div class="member-chip member-${memberClass(t.membro)}">
+              <div class="member-dot">${t.membro[0]}</div>
+              <span>${t.membro}</span>
+            </div>
+            <span class="badge badge-${prioMap[t.prio] || 'normal'}">${pLabel}</span>
+            <button class="btn btn-outline btn-sm" style="padding:2px 6px;font-size:12px;flex-shrink:0" title="Anexos" onclick="toggleUpload(${t.id});event.stopPropagation()">📎${atts.length ? ` <span style="font-family:Space Mono;font-size:9px">${atts.length}</span>` : ''}</button>
+            <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px" onclick="startEditTask(${t.id},event)">✎</button>
+            <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px;color:var(--red-bright);border-color:rgba(192,57,43,0.3)" onclick="deleteTask(${t.id},event)">×</button>
           </div>
-          <div class="member-chip member-${memberClass(t.membro)}">
-            <div class="member-dot">${t.membro[0]}</div>
-            <span>${t.membro}</span>
+          ${attHtml}
+          <div class="attachment-upload" id="upload-${t.id}" onclick="event.stopPropagation()">
+            <input type="file" id="file-${t.id}" accept="*/*">
+            <button class="btn btn-primary btn-sm" onclick="uploadAttachment(${t.id})">Carregar</button>
+            <button class="btn btn-outline btn-sm" onclick="toggleUpload(${t.id})">✕</button>
           </div>
-          <span class="badge badge-${prioMap[t.prio] || 'normal'}">${pLabel}</span>
-          <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px" onclick="startEditTask(${t.id},event)">✎</button>
-          <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px;color:var(--red-bright);border-color:rgba(192,57,43,0.3)" onclick="deleteTask(${t.id},event)">×</button>
         </div>`;
       }
     });
@@ -3301,6 +3366,58 @@ function renderOrgEvents() {
       </div>` : ''}
     </div>`;
   }).join('');
+}
+
+// ============================================================
+// TASK ATTACHMENTS
+// ============================================================
+
+const STORAGE_BUCKET = 'task-files';
+
+function attachIcon(nome) {
+  const ext = nome.split('.').pop().toLowerCase();
+  if (['jpg','jpeg','png','gif','webp'].includes(ext)) return '🖼';
+  if (['pdf'].includes(ext)) return '📄';
+  if (['mp3','wav','aiff','m4a','ogg'].includes(ext)) return '🎵';
+  if (['mp4','mov','avi'].includes(ext)) return '🎬';
+  if (['zip','rar'].includes(ext)) return '📦';
+  return '📎';
+}
+
+function toggleUpload(taskId) {
+  const el = document.getElementById(`upload-${taskId}`);
+  el.classList.toggle('open');
+}
+
+async function uploadAttachment(taskId) {
+  const input = document.getElementById(`file-${taskId}`);
+  const file  = input.files[0];
+  if (!file) { showToast('Selecciona um ficheiro'); return; }
+  if (file.size > 10 * 1024 * 1024) { showToast('Ficheiro demasiado grande (máx. 10 MB)'); return; }
+
+  const path = `${taskId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+  showToast('A carregar…');
+
+  const { error: upErr } = await sb.storage.from(STORAGE_BUCKET).upload(path, file);
+  if (upErr) { showToast('Erro no upload: ' + upErr.message); return; }
+
+  const { data: { publicUrl } } = sb.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+
+  const { error: dbErr } = await sb.from('task_attachments')
+    .insert({ task_id: taskId, nome: file.name, url: publicUrl });
+  if (dbErr) { showToast('Erro ao guardar anexo'); return; }
+
+  input.value = '';
+  document.getElementById(`upload-${taskId}`).classList.remove('open');
+  showToast('Anexo adicionado');
+}
+
+async function deleteAttachment(id, url) {
+  // Extract storage path from public URL
+  const path = url.split(`/${STORAGE_BUCKET}/`)[1];
+  if (path) await sb.storage.from(STORAGE_BUCKET).remove([path]);
+  await sb.from('task_attachments').delete().eq('id', id);
+  showToast('Anexo removido');
 }
 
 // ============================================================
