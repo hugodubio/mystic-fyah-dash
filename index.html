@@ -1320,6 +1320,10 @@
               <option value="A fazer">A fazer</option>
             </select>
           </div>
+          <div class="form-group" style="grid-column: span 2">
+            <label>Observações (opcional)</label>
+            <textarea id="tk-obs" rows="2" placeholder="Notas adicionais..."></textarea>
+          </div>
         </div>
         <button class="btn btn-primary" onclick="addTask()">Adicionar Tarefa</button>
       </div>
@@ -1860,6 +1864,24 @@ async function removeEvent(id) {
   showToast('Evento removido');
 }
 
+function startEditAgenda(id) {
+  editingAgendaId = editingAgendaId === id ? null : id;
+  renderAgenda();
+}
+
+async function saveAgenda(id) {
+  const nome   = document.getElementById(`ea-nome-${id}`).value.trim();
+  const local  = document.getElementById(`ea-local-${id}`).value.trim();
+  const data   = document.getElementById(`ea-data-${id}`).value;
+  const hora   = document.getElementById(`ea-hora-${id}`).value;
+  const estado = document.getElementById(`ea-estado-${id}`).value;
+  const link   = document.getElementById(`ea-link-${id}`).value.trim();
+  if (!nome || !data) { showToast('Nome e data obrigatórios'); return; }
+  await sb.from('events').update({ nome, local, hora, data, estado, link }).eq('id', id);
+  editingAgendaId = null;
+  showToast('Evento actualizado');
+}
+
 function statusBadge(s) {
   const map = { Confirmado: 'confirmado', Headliner: 'headliner', Pendente: 'pendente', Cancelado: 'cancelado' };
   return `<span class="badge badge-${map[s] || 'pendente'}">${s}</span>`;
@@ -1879,17 +1901,58 @@ function renderAgenda() {
     const header = `<div class="group-header">${label}</div>`;
     const rows = arr.map(e => {
       const d = new Date(e.data + 'T00:00:00');
+      const isEditing = editingAgendaId === e.id;
+
+      if (isEditing) {
+        return `
+        <div class="event-row" style="flex-direction:column;align-items:stretch;cursor:default;gap:8px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px">
+            <div class="form-group" style="margin:0;grid-column:span 2">
+              <label>Nome</label>
+              <input type="text" id="ea-nome-${e.id}" value="${e.nome.replace(/"/g,'&quot;')}">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label>Local</label>
+              <input type="text" id="ea-local-${e.id}" value="${(e.local||'').replace(/"/g,'&quot;')}">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label>Data</label>
+              <input type="date" id="ea-data-${e.id}" value="${e.data||''}">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label>Hora</label>
+              <input type="time" id="ea-hora-${e.id}" value="${e.hora||''}">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label>Estado</label>
+              <select id="ea-estado-${e.id}">
+                ${['Confirmado','Headliner','Pendente','Cancelado'].map(s=>`<option ${e.estado===s?'selected':''}>${s}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group" style="margin:0;grid-column:span 2">
+              <label>Link</label>
+              <input type="url" id="ea-link-${e.id}" value="${(e.link||'').replace(/"/g,'&quot;')}">
+            </div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary btn-sm" onclick="saveAgenda(${e.id})">Guardar</button>
+            <button class="btn btn-outline btn-sm" onclick="startEditAgenda(${e.id})">Cancelar</button>
+          </div>
+        </div>`;
+      }
+
       return `
       <div class="event-row">
         <div class="event-date-block">
           <div class="event-day">${String(d.getDate()).padStart(2,'0')}</div>
           <div class="event-month">${MONTHS[d.getMonth()]}</div>
         </div>
-        <div>
+        <div style="flex:1;min-width:0">
           <div class="event-name">${e.nome}</div>
-          <div class="event-location">${e.local}${e.hora ? ' · ' + e.hora : ''}</div>
+          <div class="event-location">${e.local||''}${e.hora ? ' · ' + e.hora : ''}</div>
         </div>
         ${statusBadge(e.estado)}
+        <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px" onclick="startEditAgenda(${e.id})">✎</button>
         <button class="btn btn-outline btn-sm" onclick="removeEvent(${e.id})">×</button>
       </div>`;
     }).join('');
@@ -1905,18 +1968,45 @@ function renderAgenda() {
 // ============================================================
 
 async function addTask() {
-  const descricao = document.getElementById('tk-desc').value.trim();
-  const membro    = document.getElementById('tk-membro').value;
-  const prio      = document.getElementById('tk-prio').value;
-  const grupo     = document.getElementById('tk-grupo').value;
+  const descricao    = document.getElementById('tk-desc').value.trim();
+  const membro       = document.getElementById('tk-membro').value;
+  const prio         = document.getElementById('tk-prio').value;
+  const grupo        = document.getElementById('tk-grupo').value;
+  const observacoes  = document.getElementById('tk-obs').value.trim();
 
   if (!descricao) { showToast('Escreve uma descrição'); return; }
 
-  const { error } = await sb.from('tasks').insert({ descricao, membro, prio, grupo, done: false });
+  const { error } = await sb.from('tasks').insert({ descricao, membro, prio, grupo, done: false, observacoes });
   if (error) { showToast('Erro ao guardar'); return; }
   document.getElementById('tk-desc').value = '';
+  document.getElementById('tk-obs').value  = '';
   document.getElementById('form-tarefas').classList.add('collapsed');
   showToast('Tarefa adicionada');
+}
+
+async function deleteTask(id, e) {
+  e.stopPropagation();
+  await sb.from('tasks').delete().eq('id', id);
+  showToast('Tarefa removida');
+}
+
+function startEditTask(id, e) {
+  e.stopPropagation();
+  editingTaskId = editingTaskId === id ? null : id;
+  renderTasks();
+}
+
+async function saveTask(id, e) {
+  e.stopPropagation();
+  const descricao   = document.getElementById(`tk-d-${id}`).value.trim();
+  const membro      = document.getElementById(`tk-m-${id}`).value;
+  const prio        = document.getElementById(`tk-p-${id}`).value;
+  const grupo       = document.getElementById(`tk-g-${id}`).value;
+  const observacoes = document.getElementById(`tk-o-${id}`).value.trim();
+  if (!descricao) { showToast('Descrição obrigatória'); return; }
+  await sb.from('tasks').update({ descricao, membro, prio, grupo, observacoes }).eq('id', id);
+  editingTaskId = null;
+  showToast('Tarefa actualizada');
 }
 
 async function toggleTask(id) {
@@ -1941,17 +2031,64 @@ function renderTasks() {
     if (!list.length) return;
     html += `<div class="group-header">${g}</div>`;
     list.forEach(t => {
-      const pLabel = t.prio === 'Médio' ? 'Médio' : t.prio;
-      html += `
-      <div class="task-row ${t.done ? 'done' : ''}" onclick="toggleTask(${t.id})">
-        <div class="task-check">${t.done ? '✓' : ''}</div>
-        <div class="task-text">${t.desc}</div>
-        <div class="member-chip member-${memberClass(t.membro)}">
-          <div class="member-dot">${t.membro[0]}</div>
-          <span>${t.membro}</span>
-        </div>
-        <span class="badge badge-${prioMap[t.prio] || 'normal'}">${pLabel}</span>
-      </div>`;
+      const pLabel    = t.prio === 'Médio' ? 'Médio' : t.prio;
+      const isEditing = editingTaskId === t.id;
+
+      if (isEditing) {
+        html += `
+        <div class="task-row" style="flex-direction:column;align-items:stretch;cursor:default;gap:8px">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div class="form-group" style="margin:0">
+              <label>Descrição</label>
+              <input type="text" id="tk-d-${t.id}" value="${t.desc.replace(/"/g,'&quot;')}">
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+              <div class="form-group" style="margin:0">
+                <label>Responsável</label>
+                <select id="tk-m-${t.id}">
+                  ${['Tito','Dubio','Berti'].map(m=>`<option ${t.membro===m?'selected':''}>${m}</option>`).join('')}
+                </select>
+              </div>
+              <div class="form-group" style="margin:0">
+                <label>Prioridade</label>
+                <select id="tk-p-${t.id}">
+                  ${['Normal','Médio','Urgente'].map(p=>`<option ${t.prio===p?'selected':''}>${p}</option>`).join('')}
+                </select>
+              </div>
+              <div class="form-group" style="margin:0">
+                <label>Grupo</label>
+                <select id="tk-g-${t.id}">
+                  ${['Esta semana','A fazer'].map(g2=>`<option ${t.grupo===g2?'selected':''}>${g2}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label>Observações</label>
+              <textarea id="tk-o-${t.id}" rows="2">${(t.observacoes||'').replace(/</g,'&lt;')}</textarea>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-primary btn-sm" onclick="saveTask(${t.id},event)">Guardar</button>
+              <button class="btn btn-outline btn-sm" onclick="startEditTask(${t.id},event)">Cancelar</button>
+            </div>
+          </div>
+        </div>`;
+      } else {
+        html += `
+        <div class="task-row ${t.done ? 'done' : ''}" onclick="toggleTask(${t.id})">
+          <div class="task-check">${t.done ? '✓' : ''}</div>
+          <div style="flex:1;min-width:0">
+            <div class="task-text">${t.desc}</div>
+            ${t.observacoes ? `<div class="obs-text" style="margin-top:3px;font-size:11px;color:var(--text-muted)">${t.observacoes}</div>` : ''}
+          </div>
+          <div class="member-chip member-${memberClass(t.membro)}">
+            <div class="member-dot">${t.membro[0]}</div>
+            <span>${t.membro}</span>
+          </div>
+          <span class="badge badge-${prioMap[t.prio] || 'normal'}">${pLabel}</span>
+          <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px" onclick="startEditTask(${t.id},event)">✎</button>
+          <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px;color:var(--red-bright);border-color:rgba(192,57,43,0.3)" onclick="deleteTask(${t.id},event)">×</button>
+        </div>`;
+      }
     });
   });
 
@@ -2047,6 +2184,31 @@ async function addDivida() {
   showToast('Adiantamento registado');
 }
 
+async function deleteDivida(id) {
+  const d = dividas.find(d => d.id === id);
+  if (!d) return;
+  // also remove abono log entries for this divida
+  await sb.from('abono_log').delete().eq('divida_id', id);
+  await sb.from('dividas').delete().eq('id', id);
+  showToast(`Adiantamento de ${d.credor} removido`);
+}
+
+function startEditDivida(id) {
+  editingDividaId = editingDividaId === id ? null : id;
+  renderDividas();
+}
+
+async function saveDivida(id) {
+  const descricao = document.getElementById(`dv-d-${id}`).value.trim();
+  const credor    = document.getElementById(`dv-c-${id}`).value;
+  const valor     = parseFloat(document.getElementById(`dv-v-${id}`).value);
+  const data      = document.getElementById(`dv-dt-${id}`).value;
+  if (!descricao || isNaN(valor) || valor <= 0) { showToast('Dados inválidos'); return; }
+  await sb.from('dividas').update({ descricao, credor, valor, data }).eq('id', id);
+  editingDividaId = null;
+  showToast('Adiantamento actualizado');
+}
+
 async function addAbono(id) {
   const input  = document.getElementById('abono-val-' + id);
   const notaEl = document.getElementById('abono-nota-' + id);
@@ -2117,6 +2279,8 @@ function renderDividas() {
     const em  = d.valor - d.pago;
     const isSaldado = st === 'saldado';
 
+    const isEditingD = editingDividaId === d.id;
+
     return `
     <div class="divida-card ${st}">
       <div class="divida-header">
@@ -2124,8 +2288,39 @@ function renderDividas() {
           <div class="member-dot">${d.credor[0]}</div>
           <span style="font-weight:700">${d.credor}</span>
         </div>
-        <span class="badge badge-${statusBadgeCls[st]}">${statusLabel[st]}</span>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span class="badge badge-${statusBadgeCls[st]}">${statusLabel[st]}</span>
+          <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px" onclick="startEditDivida(${d.id})">✎</button>
+          <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px;color:var(--red-bright);border-color:rgba(192,57,43,0.3)" onclick="deleteDivida(${d.id})">×</button>
+        </div>
       </div>
+      ${isEditingD ? `
+      <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
+        <div class="form-group" style="margin:0">
+          <label>Descrição</label>
+          <input type="text" id="dv-d-${d.id}" value="${d.desc.replace(/"/g,'&quot;')}">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+          <div class="form-group" style="margin:0">
+            <label>Credor</label>
+            <select id="dv-c-${d.id}">
+              ${['Tito','Dubio','Berti'].map(m=>`<option ${d.credor===m?'selected':''}>${m}</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label>Valor (€)</label>
+            <input type="number" id="dv-v-${d.id}" value="${d.valor}" min="0.01" step="0.01">
+          </div>
+          <div class="form-group" style="margin:0">
+            <label>Data</label>
+            <input type="date" id="dv-dt-${d.id}" value="${d.data||''}">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary btn-sm" onclick="saveDivida(${d.id})">Guardar</button>
+          <button class="btn btn-outline btn-sm" onclick="startEditDivida(${d.id})">Cancelar</button>
+        </div>
+      </div>` : `
       <div class="divida-desc">${d.desc}</div>
       <div class="divida-date">${fmtDate(d.data)}</div>
       <div class="divida-amounts">
@@ -2151,7 +2346,7 @@ function renderDividas() {
         <input type="number" id="abono-val-${d.id}" placeholder="€ valor" min="0.01" step="0.01">
         <input type="text" id="abono-nota-${d.id}" placeholder="nota (opcional)" style="flex:1.5">
         <button class="btn btn-primary btn-sm" onclick="addAbono(${d.id})">Abonar</button>
-      </div>`}
+      </div>`}`}
     </div>
     `;
   }).join('');
@@ -2207,6 +2402,27 @@ async function quickSale() {
   showToast(`Venda registada — ${qty}× ${p.nome} · +${fmtCurrency(valor)} nas Finanças`);
 }
 
+async function deleteProduct(id) {
+  await sb.from('products').delete().eq('id', id);
+  showToast('Produto removido');
+}
+
+function startEditProduct(id) {
+  editingProductId = editingProductId === id ? null : id;
+  renderMerch();
+}
+
+async function saveProduct(id) {
+  const nome  = document.getElementById(`pd-n-${id}`).value.trim();
+  const varnt = document.getElementById(`pd-v-${id}`).value.trim();
+  const preco = parseFloat(document.getElementById(`pd-p-${id}`).value) || 0;
+  const stock = parseInt(document.getElementById(`pd-s-${id}`).value) || 0;
+  if (!nome) { showToast('Nome obrigatório'); return; }
+  await sb.from('products').update({ nome, var: varnt, preco, stock }).eq('id', id);
+  editingProductId = null;
+  showToast('Produto actualizado');
+}
+
 async function addProduct() {
   const nome  = document.getElementById('mp-nome').value.trim();
   const varnt = document.getElementById('mp-var').value.trim();
@@ -2250,6 +2466,38 @@ function renderMerch() {
   const body = document.getElementById('merch-body');
   body.innerHTML = products.map(p => {
     const [label, cls] = stockStatus(p.stock);
+    const isEditingP = editingProductId === p.id;
+
+    if (isEditingP) {
+      return `
+        <tr>
+          <td colspan="6" style="padding:10px">
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:6px;align-items:end">
+              <div class="form-group" style="margin:0">
+                <label>Nome</label>
+                <input type="text" id="pd-n-${p.id}" value="${p.nome.replace(/"/g,'&quot;')}">
+              </div>
+              <div class="form-group" style="margin:0">
+                <label>Variantes</label>
+                <input type="text" id="pd-v-${p.id}" value="${(p.var||'').replace(/"/g,'&quot;')}">
+              </div>
+              <div class="form-group" style="margin:0">
+                <label>Preço</label>
+                <input type="number" id="pd-p-${p.id}" value="${p.preco}" min="0" step="0.01">
+              </div>
+              <div class="form-group" style="margin:0">
+                <label>Stock</label>
+                <input type="number" id="pd-s-${p.id}" value="${p.stock}" min="0">
+              </div>
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-primary btn-sm" onclick="saveProduct(${p.id})">✓</button>
+                <button class="btn btn-outline btn-sm" onclick="startEditProduct(${p.id})">✕</button>
+              </div>
+            </div>
+          </td>
+        </tr>`;
+    }
+
     return `
       <tr>
         <td style="font-weight:700">${p.nome}</td>
@@ -2258,9 +2506,11 @@ function renderMerch() {
         <td style="text-align:center"><span class="stock-num">${p.stock}</span></td>
         <td style="text-align:center"><span class="badge badge-${cls}">${label}</span></td>
         <td style="text-align:center">
-          <div class="adjust-group" style="justify-content:center">
+          <div class="adjust-group" style="justify-content:center;gap:4px">
             <button class="btn-icon minus" onclick="adjustStock(${p.id}, -1)">−</button>
             <button class="btn-icon" onclick="adjustStock(${p.id}, +1)">+</button>
+            <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px;margin-left:4px" onclick="startEditProduct(${p.id})">✎</button>
+            <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px;color:var(--red-bright);border-color:rgba(192,57,43,0.3)" onclick="deleteProduct(${p.id})">×</button>
           </div>
         </td>
       </tr>
@@ -2498,6 +2748,10 @@ async function deleteMerchLog(id, tipo, produto, qty) {
 // ============================================================
 // SOCIAL EDIT
 // ============================================================
+let editingAgendaId  = null;
+let editingTaskId    = null;
+let editingDividaId  = null;
+let editingProductId = null;
 let editingPostId = null;
 
 function startEditPost(id) {
