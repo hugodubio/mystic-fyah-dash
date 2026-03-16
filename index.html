@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MYSTIC FYAH — Dashboard</title>
+<title>SUBCIETY — Music Management</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -12,19 +12,21 @@
     --black3: #1a1a1a;
     --black4: #222222;
     --black5: #2a2a2a;
-    --gold: #EF9F27;
-    --gold-dim: #b87a1a;
-    --gold-glow: rgba(239,159,39,0.15);
-    --orange: #E8621A;
-    --red: #8B1A1A;
+    --gold: #ffffff;
+    --gold-dim: #cccccc;
+    --gold-glow: rgba(255,255,255,0.08);
+    --orange: #190039;
+    --red: #190039;
     --red-bright: #c0392b;
     --green: #2ecc71;
     --green-dim: #1a6e3f;
+    --purple: #190039;
+    --purple-bright: #3b0080;
     --text: #f0f0f0;
     --text-dim: #a8a8a8;
     --text-muted: #666666;
-    --border: rgba(239,159,39,0.12);
-    --border-bright: rgba(239,159,39,0.3);
+    --border: rgba(255,255,255,0.08);
+    --border-bright: rgba(255,255,255,0.22);
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -95,9 +97,9 @@
   .logo-main {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 32px;
-    letter-spacing: 0.08em;
-    color: var(--gold);
-    text-shadow: 0 0 20px rgba(239,159,39,0.4), 0 2px 4px rgba(0,0,0,0.8);
+    letter-spacing: 0.1em;
+    color: #ffffff;
+    text-shadow: 3px 0 rgba(25,0,57,0.8), -1px 0 rgba(255,255,255,0.3), 0 0 30px rgba(255,255,255,0.15);
     line-height: 1;
   }
 
@@ -228,8 +230,8 @@
     position: absolute;
     top: 0; left: 0;
     width: 3px; height: 100%;
-    background: var(--gold);
-    opacity: 0.6;
+    background: #ffffff;
+    opacity: 0.5;
   }
 
   .stat-card.entrada::before { background: var(--green); }
@@ -280,7 +282,7 @@
     vertical-align: middle;
   }
 
-  .data-table tr:hover td { background: rgba(239,159,39,0.03); }
+  .data-table tr:hover td { background: rgba(255,255,255,0.03); }
 
   /* BADGE */
   .badge {
@@ -295,16 +297,16 @@
   }
 
   .badge-confirmado { background: rgba(46,204,113,0.15); color: var(--green); border: 1px solid rgba(46,204,113,0.3); }
-  .badge-headliner  { background: rgba(239,159,39,0.15); color: var(--gold); border: 1px solid rgba(239,159,39,0.4); }
-  .badge-pendente   { background: rgba(232,98,26,0.12);  color: var(--orange); border: 1px solid rgba(232,98,26,0.3); }
+  .badge-headliner  { background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.35); }
+  .badge-pendente   { background: rgba(25,0,57,0.4);  color: #a080d0; border: 1px solid rgba(25,0,57,0.8); }
   .badge-cancelado  { background: rgba(139,26,26,0.15);  color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); }
 
   .badge-urgente { background: rgba(192,57,43,0.15); color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); }
-  .badge-medio   { background: rgba(232,98,26,0.12); color: var(--orange); border: 1px solid rgba(232,98,26,0.3); }
+  .badge-medio   { background: rgba(255,255,255,0.07); color: #aaaaaa; border: 1px solid rgba(255,255,255,0.15); }
   .badge-normal  { background: rgba(122,112,96,0.15); color: var(--text-dim); border: 1px solid rgba(122,112,96,0.2); }
 
   .badge-ok         { background: rgba(46,204,113,0.12); color: var(--green); border: 1px solid rgba(46,204,113,0.25); }
-  .badge-baixo      { background: rgba(239,159,39,0.12); color: var(--gold); border: 1px solid rgba(239,159,39,0.3); }
+  .badge-baixo      { background: rgba(255,255,255,0.08); color: #cccccc; border: 1px solid rgba(255,255,255,0.2); }
   .badge-esgotado   { background: rgba(192,57,43,0.15); color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); }
 
   .badge-entrada-tx { background: rgba(46,204,113,0.1); color: var(--green); border: 1px solid rgba(46,204,113,0.2); }
@@ -329,9 +331,9 @@
     flex-shrink: 0;
   }
 
-  .member-tito  .member-dot { background: rgba(239,159,39,0.2); color: var(--gold); border: 1px solid rgba(239,159,39,0.4); }
+  .member-tito  .member-dot { background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.3); }
   .member-dubio .member-dot { background: rgba(46,204,113,0.15); color: var(--green); border: 1px solid rgba(46,204,113,0.3); }
-  .member-berti .member-dot { background: rgba(232,98,26,0.15); color: var(--orange); border: 1px solid rgba(232,98,26,0.3); }
+  .member-berti .member-dot { background: rgba(25,0,57,0.6); color: #b090e0; border: 1px solid rgba(25,0,57,1); }
 
   /* FORM */
   .form-panel {
@@ -347,8 +349,8 @@
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 2px;
-    background: linear-gradient(90deg, var(--gold), var(--orange), transparent);
-    opacity: 0.5;
+    background: linear-gradient(90deg, #ffffff, #190039, transparent);
+    opacity: 0.6;
   }
 
   .form-title {
@@ -420,10 +422,10 @@
   }
 
   .btn-primary {
-    background: var(--gold);
-    color: var(--black);
+    background: #ffffff;
+    color: #0a0a0a;
   }
-  .btn-primary:hover { background: #f0a832; box-shadow: 0 0 12px rgba(239,159,39,0.3); }
+  .btn-primary:hover { background: #e0e0e0; box-shadow: 0 0 16px rgba(255,255,255,0.2); }
 
   .btn-outline {
     background: transparent;
@@ -684,7 +686,7 @@
   .abono-form input:focus { border-color: var(--gold-dim); }
 
   .badge-pendente-d { background: rgba(192,57,43,0.15); color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); }
-  .badge-parcial    { background: rgba(232,98,26,0.12);  color: var(--orange); border: 1px solid rgba(232,98,26,0.3); }
+  .badge-parcial    { background: rgba(255,255,255,0.08);  color: #aaaaaa; border: 1px solid rgba(255,255,255,0.18); }
   .badge-saldado    { background: rgba(46,204,113,0.12); color: var(--green); border: 1px solid rgba(46,204,113,0.25); }
 
   /* MERCH */
@@ -720,7 +722,7 @@
     top: -9px; left: 12px;
     font-size: 9px;
     letter-spacing: 0.2em;
-    color: var(--gold);
+    color: #ffffff;
     background: var(--black2);
     padding: 0 6px;
   }
@@ -933,7 +935,7 @@
     flex-shrink: 0;
   }
 
-  .account-mf  { background: rgba(239,159,39,0.15); border: 1px solid rgba(239,159,39,0.4); }
+  .account-mf  { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.25); }
   .account-sub { background: rgba(46,204,113,0.12); border: 1px solid rgba(46,204,113,0.3); }
 
   .account-name {
@@ -996,8 +998,8 @@
     font-weight: 700;
   }
 
-  .type-reel    { background: rgba(232,98,26,0.15); color: var(--orange); border: 1px solid rgba(232,98,26,0.3); }
-  .type-post    { background: rgba(239,159,39,0.12); color: var(--gold); border: 1px solid rgba(239,159,39,0.3); }
+  .type-reel    { background: rgba(25,0,57,0.5); color: #b090e0; border: 1px solid rgba(25,0,57,0.9); }
+  .type-post    { background: rgba(255,255,255,0.08); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); }
   .type-story   { background: rgba(46,204,113,0.1); color: var(--green); border: 1px solid rgba(46,204,113,0.25); }
   .type-carousel{ background: rgba(155,89,182,0.15); color: #bb8fce; border: 1px solid rgba(155,89,182,0.3); }
   .type-live    { background: rgba(192,57,43,0.15); color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); }
@@ -1091,9 +1093,9 @@
   /* FIRE LINE */
   .fire-line {
     height: 2px;
-    background: linear-gradient(90deg, var(--red), var(--orange), var(--gold), var(--orange), var(--red));
+    background: linear-gradient(90deg, #190039, #ffffff, #190039, #ffffff, #190039);
     background-size: 200% 100%;
-    animation: fireLine 3s linear infinite;
+    animation: fireLine 4s linear infinite;
     margin-bottom: 28px;
   }
   @keyframes fireLine {
@@ -1112,11 +1114,11 @@
 
 <header class="site-header">
   <div class="logo-block">
-    <div class="logo-main">MYSTIC FYAH</div>
-    <div class="logo-sub">Lisboa · Since 2007</div>
+    <div class="logo-main">SUBCIETY</div>
+    <div class="logo-sub" style="letter-spacing:0.4em;color:#ffffff;opacity:0.5">MUSIC</div>
   </div>
   <div class="header-divider"></div>
-  <div class="header-tag">Painel Interno do Coletivo</div>
+  <div class="header-tag">Music Management Tool</div>
   <div class="header-meta" id="current-date"></div>
 </header>
 
@@ -1855,7 +1857,7 @@ function renderDividas() {
     ? `${totalPendente} por saldar · ${fmtCurrency(total)} em dívida`
     : 'Tudo saldado';
 
-  const memberColors = { Tito: 'var(--gold)', Dubio: 'var(--green)', Berti: 'var(--orange)' };
+  const memberColors = { Tito: '#ffffff', Dubio: 'var(--green)', Berti: '#b090e0' };
 
   statsEl.innerHTML = members.map(m => {
     const owed = dividas.filter(d => d.credor === m).reduce((s, d) => s + (d.valor - d.pago), 0);
@@ -2059,7 +2061,7 @@ let socialFilter = 'todos';
 let socialView = 'grid';
 
 const ACCOUNT_INFO = {
-  mysticfyah: { handle: '@mysticfyah', name: 'Mystic Fyah', emoji: '📸', cls: 'account-mf',  color: 'var(--gold)' },
+  mysticfyah: { handle: '@mysticfyah', name: 'Mystic Fyah', emoji: '📸', cls: 'account-mf',  color: '#ffffff' },
   subciety:   { handle: '@subciety',   name: 'Subciety',    emoji: '🟢', cls: 'account-sub', color: 'var(--green)' },
 };
 
