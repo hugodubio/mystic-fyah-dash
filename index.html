@@ -238,6 +238,46 @@
   .stat-card.saida::before { background: var(--red-bright); }
   .stat-card.warn::before { background: var(--orange); }
   .stat-card.danger::before { background: var(--red-bright); }
+  .stat-card.merch::before { background: var(--purple-bright); }
+  .stat-card.merch .stat-value { color: #b090e0; }
+
+  .finance-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .finance-split-block {
+    background: var(--black2);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+  }
+  .finance-split-block-header {
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .finance-split-block-header span.dot {
+    width: 6px; height: 6px; border-radius: 50%; display: inline-block; flex-shrink: 0;
+  }
+  .finance-split-inner {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .finance-split-cell .stat-label { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+  .finance-split-cell .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 22px; line-height: 1; letter-spacing: 0.04em; }
+  @media (max-width: 600px) {
+    .finance-split { grid-template-columns: 1fr; }
+    .finance-split-inner { grid-template-columns: repeat(3,1fr); }
+  }
 
   .stat-label {
     font-size: 9px;
@@ -1391,6 +1431,7 @@
           <th>Categoria</th>
           <th>Tipo</th>
           <th style="text-align:right">Valor</th>
+          <th></th>
         </tr>
       </thead>
       <tbody id="tx-body"></tbody>
@@ -2116,15 +2157,47 @@ async function addTransaction() {
   showToast('Movimento registado');
 }
 
+async function deleteTransaction(id) {
+  await sb.from('transactions').delete().eq('id', id);
+  showToast('Movimento removido');
+}
+
+function startEditTx(id) {
+  editingTxId = editingTxId === id ? null : id;
+  renderFinancas();
+}
+
+async function saveTx(id) {
+  const descricao = document.getElementById(`tx-d-${id}`).value.trim();
+  const valor     = parseFloat(document.getElementById(`tx-v-${id}`).value);
+  const tipo      = document.getElementById(`tx-t-${id}`).value;
+  const cat       = document.getElementById(`tx-c-${id}`).value;
+  const data      = document.getElementById(`tx-dt-${id}`).value;
+  if (!descricao || isNaN(valor) || valor <= 0) { showToast('Dados inválidos'); return; }
+  await sb.from('transactions').update({ descricao, valor, tipo, cat, data }).eq('id', id);
+  editingTxId = null;
+  showToast('Movimento actualizado');
+}
+
 function renderFinancas() {
   const totalIn  = transactions.filter(t => t.tipo === 'entrada').reduce((s, t) => s + t.valor, 0);
   const totalOut = transactions.filter(t => t.tipo === 'saida').reduce((s, t) => s + t.valor, 0);
   const balance  = totalIn - totalOut;
 
+  const somTx     = transactions.filter(t => t.cat !== 'Merch');
+  const somIn     = somTx.filter(t => t.tipo === 'entrada').reduce((s, t) => s + t.valor, 0);
+  const somOut    = somTx.filter(t => t.tipo === 'saida').reduce((s, t) => s + t.valor, 0);
+  const somBal    = somIn - somOut;
+
+  const merchTx   = transactions.filter(t => t.cat === 'Merch');
+  const merchIn   = merchTx.filter(t => t.tipo === 'entrada').reduce((s, t) => s + t.valor, 0);
+  const merchOut  = merchTx.filter(t => t.tipo === 'saida').reduce((s, t) => s + t.valor, 0);
+  const merchBal  = merchIn - merchOut;
+
   const statsEl = document.getElementById('finance-stats');
   statsEl.innerHTML = `
     <div class="stat-card">
-      <div class="stat-label">Saldo Actual</div>
+      <div class="stat-label">Saldo Geral</div>
       <div class="stat-value num">${fmtCurrency(balance)}</div>
     </div>
     <div class="stat-card entrada">
@@ -2139,11 +2212,92 @@ function renderFinancas() {
       <div class="stat-label">Movimentos</div>
       <div class="stat-value">${transactions.length}</div>
     </div>
+    <div class="finance-split" style="grid-column:1/-1;margin-bottom:0">
+      <div class="finance-split-block">
+        <div class="finance-split-block-header">
+          <span class="dot" style="background:#ffffff"></span>Caixa Som
+        </div>
+        <div class="finance-split-inner">
+          <div class="finance-split-cell">
+            <div class="stat-label">Saldo</div>
+            <div class="stat-value" style="font-size:22px;${somBal < 0 ? 'color:var(--red-bright)' : ''}">${fmtCurrency(somBal)}</div>
+          </div>
+          <div class="finance-split-cell">
+            <div class="stat-label">Entradas</div>
+            <div class="stat-value" style="font-size:22px;color:var(--green)">${fmtCurrency(somIn)}</div>
+          </div>
+          <div class="finance-split-cell">
+            <div class="stat-label">Saídas</div>
+            <div class="stat-value" style="font-size:22px;color:var(--red-bright)">${fmtCurrency(somOut)}</div>
+          </div>
+        </div>
+      </div>
+      <div class="finance-split-block" style="border-left:3px solid var(--purple-bright)">
+        <div class="finance-split-block-header">
+          <span class="dot" style="background:var(--purple-bright)"></span>Caixa Merch
+        </div>
+        <div class="finance-split-inner">
+          <div class="finance-split-cell">
+            <div class="stat-label">Saldo</div>
+            <div class="stat-value" style="font-size:22px;color:#b090e0;${merchBal < 0 ? 'color:var(--red-bright)' : ''}">${fmtCurrency(merchBal)}</div>
+          </div>
+          <div class="finance-split-cell">
+            <div class="stat-label">Entradas</div>
+            <div class="stat-value" style="font-size:22px;color:var(--green)">${fmtCurrency(merchIn)}</div>
+          </div>
+          <div class="finance-split-cell">
+            <div class="stat-label">Saídas</div>
+            <div class="stat-value" style="font-size:22px;color:var(--red-bright)">${fmtCurrency(merchOut)}</div>
+          </div>
+        </div>
+      </div>
+    </div>
   `;
 
   const body = document.getElementById('tx-body');
   const sorted = [...transactions].sort((a, b) => b.data.localeCompare(a.data));
-  body.innerHTML = sorted.map(t => `
+  const TX_CATS = ['Cachê','Merch','Equipamento','Transporte','Produção','Outro'];
+  body.innerHTML = sorted.map(t => {
+    const isEditingT = editingTxId === t.id;
+    if (isEditingT) {
+      return `
+      <tr>
+        <td colspan="6" style="padding:10px">
+          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:6px;align-items:end">
+            <div class="form-group" style="margin:0">
+              <label>Descrição</label>
+              <input type="text" id="tx-d-${t.id}" value="${t.desc.replace(/"/g,'&quot;')}">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label>Valor (€)</label>
+              <input type="number" id="tx-v-${t.id}" value="${t.valor}" min="0.01" step="0.01">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label>Tipo</label>
+              <select id="tx-t-${t.id}">
+                <option ${t.tipo==='entrada'?'selected':''} value="entrada">Entrada</option>
+                <option ${t.tipo==='saida'?'selected':''} value="saida">Saída</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label>Categoria</label>
+              <select id="tx-c-${t.id}">
+                ${TX_CATS.map(c=>`<option ${t.cat===c?'selected':''}>${c}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label>Data</label>
+              <input type="date" id="tx-dt-${t.id}" value="${t.data||''}">
+            </div>
+            <div style="display:flex;gap:5px">
+              <button class="btn btn-primary btn-sm" onclick="saveTx(${t.id})">✓</button>
+              <button class="btn btn-outline btn-sm" onclick="startEditTx(${t.id})">✕</button>
+            </div>
+          </div>
+        </td>
+      </tr>`;
+    }
+    return `
     <tr>
       <td>${fmtDate(t.data)}</td>
       <td>${t.desc}</td>
@@ -2154,8 +2308,12 @@ function renderFinancas() {
           ${t.tipo === 'entrada' ? '+' : '−'} ${fmtCurrency(t.valor)}
         </span>
       </td>
-    </tr>
-  `).join('');
+      <td style="text-align:right;white-space:nowrap">
+        <button class="btn btn-outline btn-sm" style="padding:2px 6px;font-size:11px" onclick="startEditTx(${t.id})">✎</button>
+        <button class="btn btn-outline btn-sm" style="padding:2px 6px;font-size:11px;color:var(--red-bright);border-color:rgba(192,57,43,0.3)" onclick="deleteTransaction(${t.id})">×</button>
+      </td>
+    </tr>`;
+  }).join('');
 }
 
 // ============================================================
@@ -2752,6 +2910,7 @@ let editingAgendaId  = null;
 let editingTaskId    = null;
 let editingDividaId  = null;
 let editingProductId = null;
+let editingTxId      = null;
 let editingPostId = null;
 
 function startEditPost(id) {
