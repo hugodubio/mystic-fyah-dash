@@ -810,19 +810,99 @@
     margin: 24px 0;
   }
 
-  /* RESPONSIVE */
+  /* ============================================================
+     RESPONSIVE — MOBILE FIRST
+     ============================================================ */
+
+  /* Make all data tables horizontally scrollable */
+  .data-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
   @media (max-width: 700px) {
-    .site-header { padding: 0 14px; height: 56px; }
-    .logo-main { font-size: 26px; }
-    .main { padding: 18px 14px 50px; }
-    .nav-tabs { padding: 0 14px; }
-    .nav-tab { padding: 12px 14px 10px; font-size: 14px; }
-    .event-row { grid-template-columns: 50px 1fr; gap: 10px; }
-    .event-row .badge { display: none; }
-    .data-table { font-size: 11px; }
-    .data-table th, .data-table td { padding: 8px 8px; }
-    .cards-row { grid-template-columns: 1fr 1fr; }
-    .header-tag, .header-meta { display: none; }
+    /* ── Header ── */
+    .site-header    { padding: 0 14px; height: 52px; gap: 12px; }
+    .logo-main      { font-size: 24px; }
+    .logo-sub       { font-size: 7px; letter-spacing: 0.2em; }
+    .header-divider, .header-tag, .header-meta { display: none; }
+
+    /* ── Nav ── */
+    .nav-tabs       { padding: 0 8px; }
+    .nav-tab        { padding: 10px 11px 9px; font-size: 13px; }
+    .nav-tab .tab-num { display: none; }
+
+    /* ── Main layout ── */
+    .main           { padding: 16px 12px 80px; }
+    .section-title  { font-size: 22px; }
+    .section-header { margin-bottom: 16px; }
+
+    /* ── Stat cards ── */
+    .cards-row  { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+    .stat-card  { padding: 12px 12px; }
+    .stat-value { font-size: 20px; }
+
+    /* ── Form panels ── */
+    .form-panel { padding: 14px 14px; margin-bottom: 20px; }
+    .form-grid  { grid-template-columns: 1fr !important; gap: 8px; }
+
+    /* ── Agenda event row ── */
+    .event-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 12px;
+    }
+    .event-date-block { flex-shrink: 0; }
+    .event-row > div:nth-child(2) { flex: 1; min-width: 100px; }
+    .event-row > .badge { order: 3; flex-shrink: 0; }
+    .event-row > button { padding: 4px 8px; font-size: 12px; }
+
+    /* ── Tarefas ── */
+    .task-row   { flex-wrap: wrap; padding: 10px 12px; gap: 6px; }
+    .task-check { flex-shrink: 0; }
+    .task-row > div:nth-child(2) { flex: 1 1 calc(100% - 90px); min-width: 0; }
+    .task-row .member-chip { font-size: 10px; }
+    .task-row .member-chip span { display: none; }
+
+    /* ── Finance split ── */
+    .finance-split { grid-template-columns: 1fr; }
+    .finance-split-inner { gap: 6px; }
+    .finance-split-cell .stat-value { font-size: 17px !important; }
+
+    /* ── Finanças table ── */
+    #tx-table { min-width: 560px; }
+
+    /* ── Quick sale ── */
+    .quick-sale-bar {
+      flex-direction: column;
+      gap: 8px;
+      align-items: stretch;
+    }
+    .quick-sale-bar select,
+    .quick-sale-bar input { min-width: 0; width: 100%; }
+    .quick-sale-bar .btn  { width: 100%; text-align: center; }
+
+    /* ── Merch table ── */
+    #merch-table { min-width: 580px; }
+
+    /* ── Dívidas ── */
+    .dividas-grid { grid-template-columns: 1fr; }
+    .abono-form   { flex-direction: column; }
+    .abono-form input { width: 100%; }
+
+    /* ── Merch log ── */
+    .log-item { flex-wrap: wrap; gap: 5px; }
+    .log-item button { margin-left: 0 !important; }
+
+    /* ── Social post grid ── */
+    .post-grid { grid-template-columns: 1fr; }
+
+    /* ── Release / Eventos cards ── */
+    .release-card,
+    .ev-org-row { padding: 14px 14px; }
   }
 
   /* SOCIAL */
@@ -923,8 +1003,9 @@
   }
 
   @media (max-width: 700px) {
-    .post-list-row { grid-template-columns: 80px 80px 1fr auto; }
-    .post-list-row .list-type-col, .post-list-row .list-member-col { display: none; }
+    .post-list-row { grid-template-columns: 80px 90px 1fr auto auto; gap: 8px; padding: 8px 10px; }
+    .post-list-row .list-type-col,
+    .post-list-row .list-member-col { display: none; }
     .list-header-row { display: none; }
   }
 
@@ -1226,14 +1307,8 @@
   /* FIRE LINE */
   .fire-line {
     height: 2px;
-    background: linear-gradient(90deg, #190039, #ffffff, #190039, #ffffff, #190039);
-    background-size: 200% 100%;
-    animation: fireLine 4s linear infinite;
+    background: var(--purple-bright);
     margin-bottom: 28px;
-  }
-  @keyframes fireLine {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
   }
 
   .amount-col { font-family: 'Space Mono', monospace; font-size: 12px; }
