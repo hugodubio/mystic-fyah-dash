@@ -371,6 +371,7 @@
   .member-tito  .member-dot { background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.3); }
   .member-dubio .member-dot { background: rgba(46,204,113,0.15); color: var(--green); border: 1px solid rgba(46,204,113,0.3); }
   .member-berti .member-dot { background: rgba(25,0,57,0.6); color: var(--purple-accent); border: 1px solid rgba(25,0,57,1); }
+  .member-canas .member-dot { background: rgba(239,159,39,0.15); color: #EF9F27; border: 1px solid rgba(239,159,39,0.4); }
 
   /* FORM */
   .form-panel {
@@ -1454,6 +1455,7 @@
               <option value="Tito">Tito</option>
               <option value="Dubio">Dubio</option>
               <option value="Berti">Berti</option>
+              <option value="Canas">Canas</option>
             </select>
           </div>
           <div class="form-group">
@@ -1575,6 +1577,7 @@
               <option value="Tito">Tito</option>
               <option value="Dubio">Dubio</option>
               <option value="Berti">Berti</option>
+              <option value="Canas">Canas</option>
             </select>
           </div>
           <div class="form-group">
@@ -1708,6 +1711,7 @@
               <option value="Tito">Tito</option>
               <option value="Dubio">Dubio</option>
               <option value="Berti">Berti</option>
+              <option value="Canas">Canas</option>
             </select>
           </div>
         </div>
@@ -2198,7 +2202,7 @@ function renderTasks() {
             <div class="form-group" style="margin:0">
               <label>Responsável</label>
               <select id="tk-m-${t.id}">
-                ${['Tito','Dubio','Berti'].map(m=>`<option ${t.membro===m?'selected':''}>${m}</option>`).join('')}
+                ${['Tito','Dubio','Berti','Canas'].map(m=>`<option ${t.membro===m?'selected':''}>${m}</option>`).join('')}
               </select>
             </div>
             <div class="form-group" style="margin:0">
@@ -2525,7 +2529,7 @@ function renderDividas() {
   const total   = dividas.reduce((s, d) => s + (d.valor - d.pago), 0);
 
   // Per-member summary
-  const members = ['Tito', 'Dubio', 'Berti'];
+  const members = ['Tito', 'Dubio', 'Berti', 'Canas'];
   const statsEl = document.getElementById('dividas-stats');
   const countEl = document.getElementById('dividas-count');
 
@@ -2534,7 +2538,7 @@ function renderDividas() {
     ? `${totalPendente} por saldar · ${fmtCurrency(total)} em dívida`
     : 'Tudo saldado';
 
-  const memberColors = { Tito: '#ffffff', Dubio: 'var(--green)', Berti: 'var(--purple-accent)' };
+  const memberColors = { Tito: '#ffffff', Dubio: 'var(--green)', Berti: 'var(--purple-accent)', Canas: '#EF9F27' };
 
   statsEl.innerHTML = members.map(m => {
     const owed = dividas.filter(d => d.credor === m).reduce((s, d) => s + (d.valor - d.pago), 0);
@@ -2593,7 +2597,7 @@ function renderDividas() {
           <div class="form-group" style="margin:0">
             <label>Credor</label>
             <select id="dv-c-${d.id}">
-              ${['Tito','Dubio','Berti'].map(m=>`<option ${d.credor===m?'selected':''}>${m}</option>`).join('')}
+              ${['Tito','Dubio','Berti','Canas'].map(m=>`<option ${d.credor===m?'selected':''}>${m}</option>`).join('')}
             </select>
           </div>
           <div class="form-group" style="margin:0">
@@ -3091,7 +3095,7 @@ function editPostForm(p) {
       <div class="form-group">
         <label>Responsável</label>
         <select id="ep-membro-${p.id}">
-          ${['Tito','Dubio','Berti'].map(m=>`<option ${p.membro===m?'selected':''}>${m}</option>`).join('')}
+          ${['Tito','Dubio','Berti','Canas'].map(m=>`<option ${p.membro===m?'selected':''}>${m}</option>`).join('')}
         </select>
       </div>
     </div>
