@@ -2002,7 +2002,12 @@ function setupRealtime() {
   const tables = ['events','tasks','transactions','dividas','abono_log','products','merch_log','posts','releases','org_events','task_attachments'];
   const ch = sb.channel('db-realtime');
   tables.forEach(t => ch.on('postgres_changes', { event: '*', schema: 'public', table: t }, () => loadTable(t)));
-  ch.subscribe();
+  ch.subscribe(status => {
+    if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+      console.warn('Realtime desligado, a reconectar…', status);
+      setTimeout(() => { sb.removeChannel(ch); setupRealtime(); }, 3000);
+    }
+  });
 }
 
 // ============================================================
