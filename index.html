@@ -30,6 +30,39 @@
     --border-bright: rgba(255,255,255,0.22);
   }
 
+  body.day {
+    --black: #f4f4f0;
+    --black2: #eaeae4;
+    --black3: #dededa;
+    --black4: #d0d0ca;
+    --black5: #c8c8c0;
+    --gold: #111111;
+    --gold-dim: #333333;
+    --gold-glow: rgba(0,0,0,0.06);
+    --text: #111111;
+    --text-dim: #444444;
+    --text-muted: #888888;
+    --border: rgba(0,0,0,0.10);
+    --border-bright: rgba(0,0,0,0.25);
+  }
+  body.day::before { opacity: 0.15; }
+  body.day::after  { display: none; }
+
+  .theme-btn {
+    margin-left: auto;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 16px;
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    border-radius: 2px;
+    flex-shrink: 0;
+    transition: border-color 0.15s;
+  }
+  .theme-btn:hover { border-color: var(--border-bright); }
+
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   html { scroll-behavior: smooth; }
@@ -1365,6 +1398,7 @@
   <div class="header-divider"></div>
   <div class="header-tag">Music Management Tool</div>
   <div class="header-meta" id="current-date"></div>
+  <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Alternar tema">🌙</button>
 </header>
 
 <nav class="nav-tabs">
@@ -3433,6 +3467,18 @@ function setCurrentDate() {
   const days = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
   const el = document.getElementById('current-date');
   el.textContent = `${days[now.getDay()]} · ${fmtDate(today())}`;
+}
+
+function toggleTheme() {
+  const isDay = document.body.classList.toggle('day');
+  document.getElementById('theme-btn').textContent = isDay ? '☀️' : '🌙';
+  localStorage.setItem('theme', isDay ? 'day' : 'dark');
+}
+
+// Restore saved theme
+if (localStorage.getItem('theme') === 'day') {
+  document.body.classList.add('day');
+  document.getElementById('theme-btn').textContent = '☀️';
 }
 
 document.querySelectorAll('.form-panel').forEach(f => f.classList.add('collapsed'));
