@@ -1376,33 +1376,38 @@ async function loadTable(table) {
 
 async function loadAll() {
   showLoading(true);
-  const [ev, tk, tx, dv, ab, pr, ml, po, rl, oe, ta] = await Promise.all([
-    sb.from('events').select('*').order('data'),
-    sb.from('tasks').select('*').order('created_at'),
-    sb.from('transactions').select('*').order('created_at', { ascending: false }),
-    sb.from('dividas').select('*').order('created_at', { ascending: false }),
-    sb.from('abono_log').select('*').order('created_at', { ascending: false }),
-    sb.from('products').select('*').order('nome'),
-    sb.from('merch_log').select('*').order('created_at', { ascending: false }),
-    sb.from('posts').select('*').order('data'),
-    sb.from('releases').select('*').order('created_at', { ascending: false }),
-    sb.from('org_events').select('*').order('created_at', { ascending: false }),
-    sb.from('task_attachments').select('*').order('created_at', { ascending: false }),
-  ]);
-  events           = ev.data || [];
-  tasks            = (tk.data || []).map(mapTask);
-  transactions     = (tx.data || []).map(mapTx);
-  dividas          = (dv.data || []).map(mapDv);
-  abonoLog         = (ab.data || []).map(mapAb);
-  products         = pr.data || [];
-  merchLog         = ml.data || [];
-  posts            = po.data || [];
-  releases         = rl.data || [];
-  orgEvents        = oe.data || [];
-  taskAttachments  = ta.data || [];
-
-  renderAgenda(); renderTasks(); renderFinancas(); renderDividas(); renderMerch(); renderSocial(); renderReleases(); renderOrgEvents();
-  showLoading(false);
+  try {
+    const [ev, tk, tx, dv, ab, pr, ml, po, rl, oe, ta] = await Promise.all([
+      sb.from('events').select('*').order('data'),
+      sb.from('tasks').select('*').order('created_at'),
+      sb.from('transactions').select('*').order('created_at', { ascending: false }),
+      sb.from('dividas').select('*').order('created_at', { ascending: false }),
+      sb.from('abono_log').select('*').order('created_at', { ascending: false }),
+      sb.from('products').select('*').order('nome'),
+      sb.from('merch_log').select('*').order('created_at', { ascending: false }),
+      sb.from('posts').select('*').order('data'),
+      sb.from('releases').select('*').order('created_at', { ascending: false }),
+      sb.from('org_events').select('*').order('created_at', { ascending: false }),
+      sb.from('task_attachments').select('*').order('created_at', { ascending: false }),
+    ]);
+    events           = ev.data || [];
+    tasks            = (tk.data || []).map(mapTask);
+    transactions     = (tx.data || []).map(mapTx);
+    dividas          = (dv.data || []).map(mapDv);
+    abonoLog         = (ab.data || []).map(mapAb);
+    products         = pr.data || [];
+    merchLog         = ml.data || [];
+    posts            = po.data || [];
+    releases         = rl.data || [];
+    orgEvents        = oe.data || [];
+    taskAttachments  = ta.data || [];
+    renderAgenda(); renderTasks(); renderFinancas(); renderDividas(); renderMerch(); renderSocial(); renderReleases(); renderOrgEvents();
+  } catch (err) {
+    console.error('loadAll error:', err);
+    showToast('Erro ao carregar dados — verifica a ligação');
+  } finally {
+    showLoading(false);
+  }
 }
 
 function setupRealtime() {
@@ -2171,16 +2176,23 @@ async function quickSale() {
   const valor = Number(p.preco) * qty;
   const descricao = `Venda Merch — ${p.nome} ×${qty}`;
 
-  // Criar transação financeira e obter o id
-  const { data: txData } = await sb.from('transactions')
-    .insert({ descricao, cat: 'Merch', tipo: 'entrada', valor, data: today() })
-    .select('id').single();
+  try {
+    const { data: txData, error: txErr } = await sb.from('transactions')
+      .insert({ descricao, cat: 'Merch', tipo: 'entrada', valor, data: today() })
+      .select('id').single();
+    if (txErr) throw txErr;
 
-  const transaction_id = txData?.id || null;
+    const transaction_id = txData?.id || null;
 
-  await sb.from('products').update({ stock: p.stock - qty }).eq('id', pid);
-  await sb.from('merch_log').insert({ tipo: 'venda', produto: p.nome, qty, data: today(), transaction_id });
-  showToast(`Venda registada — ${qty}× ${p.nome} · +${fmtCurrency(valor)} nas Finanças`);
+    const { error: stErr } = await sb.from('products').update({ stock: p.stock - qty }).eq('id', pid);
+    if (stErr) throw stErr;
+
+    await sb.from('merch_log').insert({ tipo: 'venda', produto: p.nome, qty, data: today(), transaction_id });
+    showToast(`Venda registada — ${qty}× ${p.nome} · +${fmtCurrency(valor)} nas Finanças`);
+  } catch (err) {
+    console.error('quickSale error:', err);
+    showToast('Erro ao registar venda — tenta novamente');
+  }
 }
 
 async function deleteProduct(id) {
@@ -2943,6 +2955,16 @@ document.querySelectorAll('.form-panel').forEach(f => f.classList.add('collapsed
 setCurrentDate();
 loadAll();
 setupRealtime();
+
+// Mobile sidebar: dismiss on outside click
+document.addEventListener('click', e => {
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar && sidebar.classList.contains('open')) {
+    if (!sidebar.contains(e.target) && !e.target.closest('.mobile-menu-btn')) {
+      sidebar.classList.remove('open');
+    }
+  }
+});
 </script>
 </body>
 </html>
