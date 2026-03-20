@@ -253,6 +253,13 @@
     color: var(--text);
     letter-spacing: -0.01em;
   }
+  .section-subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+    letter-spacing: 0;
+    margin-top: 2px;
+  }
   .section-count {
     font-size: 10px;
     color: var(--text-muted);
@@ -779,7 +786,7 @@
       <span class="sidebar-icon">♪</span>Releases
     </button>
     <button class="sidebar-item" data-tab="eventos" onclick="switchTab('eventos')">
-      <span class="sidebar-icon">◈</span>Eventos
+      <span class="sidebar-icon">◈</span>Promotor
     </button>
   </div>
   <div class="sidebar-footer">
@@ -807,7 +814,10 @@
   <!-- ===== AGENDA ===== -->
   <section class="module active" id="mod-agenda">
     <div class="section-header">
-      <div class="section-title">Agenda</div>
+      <div>
+        <div class="section-title">Agenda</div>
+        <div class="section-subtitle">Gigs &amp; atuações confirmadas</div>
+      </div>
       <div class="section-count" id="agenda-count"></div>
     </div>
 
@@ -1226,7 +1236,10 @@
   <!-- ===== EVENTOS ===== -->
   <section class="module" id="mod-eventos">
     <div class="section-header">
-      <div class="section-title">Eventos</div>
+      <div>
+        <div class="section-title">Promotor</div>
+        <div class="section-subtitle">Ideias &amp; eventos a organizar</div>
+      </div>
       <div class="section-count" id="eventos-count"></div>
     </div>
 
@@ -1234,7 +1247,7 @@
 
     <div class="form-panel collapsed" id="form-eventos">
       <div class="form-title" onclick="toggleForm('form-eventos')">
-        <span>+ Novo Evento</span>
+        <span>+ Nova Ideia / Evento</span>
         <span class="toggle-icon">▼</span>
       </div>
       <div class="form-body">
@@ -1419,7 +1432,7 @@ function toggleForm(id) {
   document.getElementById(id).classList.toggle('collapsed');
 }
 
-const TAB_LABELS = { agenda:'Agenda', tarefas:'Tarefas', financas:'Finanças', merch:'Merch', social:'Social', releases:'Releases', eventos:'Eventos' };
+const TAB_LABELS = { agenda:'Agenda', tarefas:'Tarefas', financas:'Finanças', merch:'Merch', social:'Social', releases:'Releases', eventos:'Promotor' };
 function switchTab(name) {
   document.querySelectorAll('.sidebar-item').forEach(t => {
     t.classList.toggle('active', t.dataset.tab === name);
