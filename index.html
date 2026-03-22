@@ -171,6 +171,7 @@
     white-space: nowrap;
   }
   .sidebar-item:hover { background: var(--surface); color: var(--text-dim); }
+  .sidebar-item:focus-visible { outline: 2px solid var(--accent-light); outline-offset: -2px; }
   .sidebar-item.active { background: var(--surface2); color: var(--text); }
   .sidebar-item.active .sidebar-icon { color: var(--accent-light); }
   .sidebar-icon {
@@ -490,7 +491,7 @@
     cursor: pointer;
     border: none;
     border-radius: var(--radius-sm);
-    transition: all 0.12s;
+    transition: background 0.12s, border-color 0.12s, color 0.12s, box-shadow 0.12s;
   }
   .btn-primary { background: var(--accent); color: #fff; }
   .btn-primary:hover { background: var(--accent-bright); box-shadow: 0 4px 12px rgba(124,58,237,0.3); }
@@ -499,6 +500,7 @@
   .btn-danger { background: transparent; color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
   .btn-danger:hover { background: rgba(239,68,68,0.08); }
   .btn-sm { font-size: 11px; padding: 4px 10px; }
+  .btn:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; }
   .btn-icon {
     width: 26px; height: 26px;
     display: inline-flex; align-items: center; justify-content: center;
@@ -509,11 +511,12 @@
     border-radius: var(--radius-sm);
     font-size: 13px;
     line-height: 1;
-    transition: all 0.1s;
+    transition: border-color 0.1s, color 0.1s;
     font-family: monospace;
   }
   .btn-icon:hover { border-color: var(--accent-light); color: var(--accent-light); }
   .btn-icon.minus:hover { border-color: var(--red); color: var(--red); }
+  .btn-icon:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; }
 
   /* AGENDA */
   .event-row {
@@ -558,13 +561,14 @@
     border-radius: var(--radius-sm);
     margin-bottom: 3px;
     cursor: pointer;
-    transition: all 0.12s;
+    transition: background 0.12s, border-color 0.12s;
   }
   .task-row:hover { border-color: var(--border-bright); background: var(--surface2); }
+  .task-row:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 1px; }
   .task-row.done { opacity: 0.4; }
-  .task-check { width: 17px; height: 17px; border: 1px solid var(--border-bright); border-radius: 3px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--green); transition: all 0.12s; }
+  .task-check { width: 17px; height: 17px; border: 1px solid var(--border-bright); border-radius: 3px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--green); transition: background 0.12s, border-color 0.12s; }
   .task-row.done .task-check { background: rgba(34,197,94,0.12); border-color: rgba(34,197,94,0.36); }
-  .task-text { flex: 1; font-size: 13px; transition: all 0.12s; }
+  .task-text { flex: 1; font-size: 13px; transition: color 0.12s; }
   .task-row.done .task-text { text-decoration: line-through; color: var(--text-muted); }
 
   /* FINANCES */
@@ -616,9 +620,10 @@
 
   /* SOCIAL */
   .social-filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; align-items: center; }
-  .filter-pill { font-size: 11px; letter-spacing: 0.06em; padding: 4px 12px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; border-radius: 20px; transition: all 0.12s; white-space: nowrap; font-weight: 500; }
+  .filter-pill { font-size: 11px; letter-spacing: 0.06em; padding: 4px 12px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; border-radius: 20px; transition: border-color 0.12s, color 0.12s, background 0.12s; white-space: nowrap; font-weight: 500; }
   .filter-pill:hover { border-color: var(--border-bright); color: var(--text-dim); }
   .filter-pill.active { background: rgba(124,58,237,0.1); border-color: var(--accent-light); color: var(--accent-light); }
+  .filter-pill:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; }
   .post-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
   .post-list { display: flex; flex-direction: column; gap: 2px; }
   .post-list-row { display: grid; grid-template-columns: 90px 110px 90px 1fr auto auto; align-items: center; gap: 10px; padding: 9px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); border-left: 3px solid transparent; transition: background 0.1s, border-color 0.1s; }
@@ -628,7 +633,7 @@
   .post-list-date .list-time { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--text-muted); font-weight: normal; display: block; letter-spacing: 0; }
   .post-list-notes { font-size: 11px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .view-toggle { display: flex; gap: 2px; margin-left: auto; flex-shrink: 0; }
-  .view-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: transparent; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; border-radius: var(--radius-sm); font-size: 12px; transition: all 0.12s; }
+  .view-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: transparent; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; border-radius: var(--radius-sm); font-size: 12px; transition: border-color 0.12s, color 0.12s, background 0.12s; }
   .view-btn:hover { border-color: var(--border-bright); color: var(--text); }
   .view-btn.active { background: rgba(124,58,237,0.1); border-color: var(--accent-light); color: var(--accent-light); }
   .list-header-row { display: grid; grid-template-columns: 90px 110px 90px 1fr auto auto; gap: 10px; padding: 7px 14px; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); background: var(--surface2); border-radius: var(--radius-sm); margin-bottom: 5px; font-weight: 600; }
@@ -655,7 +660,7 @@
   .type-story   { background: rgba(34,197,94,0.08); color: #22c55e; border: 1px solid rgba(34,197,94,0.24); }
   .type-carousel{ background: rgba(155,89,182,0.12); color: #bb8fce; border: 1px solid rgba(155,89,182,0.28); }
   .type-live    { background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.28); }
-  .btn-publish { font-family: 'Inter', system-ui, sans-serif; font-size: 10px; letter-spacing: 0.06em; padding: 4px 10px; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text-muted); border-radius: var(--radius-sm); transition: all 0.12s; white-space: nowrap; font-weight: 500; }
+  .btn-publish { font-family: 'Inter', system-ui, sans-serif; font-size: 10px; letter-spacing: 0.06em; padding: 4px 10px; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text-muted); border-radius: var(--radius-sm); transition: border-color 0.12s, color 0.12s, background 0.12s; white-space: nowrap; font-weight: 500; }
   .btn-publish:hover { border-color: var(--green); color: var(--green); background: rgba(34,197,94,0.05); }
   .post-card.publicado .btn-publish { color: var(--text-muted); border-color: var(--border); cursor: default; }
   .social-legend { display: flex; gap: 14px; margin-left: auto; flex-wrap: wrap; }
@@ -695,7 +700,7 @@
   .empty-state .empty-icon { font-size: 28px; margin-bottom: 12px; opacity: 0.25; }
 
   /* TOAST */
-  #toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--border-bright); color: var(--text); font-size: 12px; letter-spacing: 0.06em; padding: 10px 18px; border-radius: var(--radius-sm); z-index: 10000; opacity: 0; transform: translateY(8px); transition: all 0.22s; pointer-events: none; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+  #toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--border-bright); color: var(--text); font-size: 12px; letter-spacing: 0.06em; padding: 10px 18px; border-radius: var(--radius-sm); z-index: 10000; opacity: 0; transform: translateY(8px); transition: opacity 0.22s, transform 0.22s; pointer-events: none; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
   #toast.show { opacity: 1; transform: translateY(0); }
 
 
@@ -746,7 +751,7 @@
     background: transparent;
     border: 1px solid var(--border);
     color: var(--text-muted);
-    width: 30px; height: 30px;
+    width: 44px; height: 44px;
     align-items: center; justify-content: center;
     border-radius: var(--radius-sm);
     cursor: pointer;
@@ -801,7 +806,7 @@
 
 <div class="content-area">
   <div class="topbar">
-    <button class="mobile-menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')" title="Menu">☰</button>
+    <button class="mobile-menu-btn" onclick="sidebarEl.classList.toggle('open')" title="Menu">☰</button>
     <span class="topbar-section" id="topbar-section">Agenda</span>
     <span class="topbar-count" id="topbar-count"></span>
     <div class="topbar-divider"></div>
@@ -1307,7 +1312,7 @@
 </div>
 
 <div id="loading-bar"></div>
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <script>
 // ============================================================
@@ -2184,10 +2189,11 @@ async function quickSale() {
 
     const transaction_id = txData?.id || null;
 
-    const { error: stErr } = await sb.from('products').update({ stock: p.stock - qty }).eq('id', pid);
+    const [{ error: stErr }] = await Promise.all([
+      sb.from('products').update({ stock: p.stock - qty }).eq('id', pid),
+      sb.from('merch_log').insert({ tipo: 'venda', produto: p.nome, qty, data: today(), transaction_id }),
+    ]);
     if (stErr) throw stErr;
-
-    await sb.from('merch_log').insert({ tipo: 'venda', produto: p.nome, qty, data: today(), transaction_id });
     showToast(`Venda registada — ${qty}× ${p.nome} · +${fmtCurrency(valor)} nas Finanças`);
   } catch (err) {
     console.error('quickSale error:', err);
@@ -2957,12 +2963,10 @@ loadAll();
 setupRealtime();
 
 // Mobile sidebar: dismiss on outside click
+const sidebarEl = document.getElementById('sidebar');
 document.addEventListener('click', e => {
-  const sidebar = document.getElementById('sidebar');
-  if (sidebar && sidebar.classList.contains('open')) {
-    if (!sidebar.contains(e.target) && !e.target.closest('.mobile-menu-btn')) {
-      sidebar.classList.remove('open');
-    }
+  if (sidebarEl?.classList.contains('open') && !sidebarEl.contains(e.target) && !e.target.closest('.mobile-menu-btn')) {
+    sidebarEl.classList.remove('open');
   }
 });
 </script>
