@@ -546,7 +546,7 @@
   /* AGENDA */
   .event-row {
     display: grid;
-    grid-template-columns: 56px 1fr auto auto;
+    grid-template-columns: 56px 1fr auto;
     gap: 12px;
     align-items: center;
     padding: 14px 18px;
@@ -1633,10 +1633,12 @@ function renderAgenda() {
           <div class="event-name">${e.nome}</div>
           <div class="event-location">${e.local||''}${e.hora ? ' · ' + e.hora : ''}</div>
         </div>
-        ${statusBadge(e.estado)}
-        <a class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px;text-decoration:none" href="${gcalUrl(e)}" target="_blank" title="Adicionar ao Google Calendar">📅</a>
-        <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px" onclick="startEditAgenda(${e.id})">✎</button>
-        <button class="btn btn-outline btn-sm" onclick="removeEvent(${e.id})">×</button>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+          ${statusBadge(e.estado)}
+          <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px" onclick="startEditAgenda(${e.id})">✎</button>
+          <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px;color:var(--red);border-color:rgba(239,68,68,0.3)" onclick="removeEvent(${e.id})">×</button>
+          <a class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px;text-decoration:none" href="${gcalUrl(e)}" target="_blank" title="Adicionar ao Google Calendar">📅</a>
+        </div>
       </div>`;
     }).join('');
     return header + rows;
