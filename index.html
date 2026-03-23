@@ -1198,6 +1198,9 @@
       <button class="filter-pill" onclick="setSocialFilter('Story', this)">Story</button>
       <button class="filter-pill" onclick="setSocialFilter('Carousel', this)">Carousel</button>
       <button class="filter-pill" onclick="setSocialFilter('Live', this)">Live</button>
+      <div style="width:1px;height:16px;background:var(--border);margin:0 4px"></div>
+      <button class="filter-pill" onclick="setSocialFilter('pendentes', this)">Pendentes</button>
+      <button class="filter-pill" onclick="setSocialFilter('publicados', this)">Publicados</button>
       <div class="social-legend">
         <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>@mysticfyah</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>@subciety</div>
@@ -1206,6 +1209,7 @@
         <button class="view-btn active" id="vbtn-grid" onclick="setSocialView('grid')" title="Grelha">⊞</button>
         <button class="view-btn" id="vbtn-list" onclick="setSocialView('list')" title="Lista">☰</button>
       </div>
+      <button class="btn btn-outline btn-sm" onclick="exportSocialCSV()" title="Exportar todos os posts como CSV" style="font-size:11px;padding:4px 10px;flex-shrink:0">↓ CSV</button>
     </div>
 
     <div id="social-grid"></div>
@@ -2411,6 +2415,25 @@ function setSocialView(v) {
   renderSocial();
 }
 
+function exportSocialCSV() {
+  if (!posts.length) { showToast('Sem posts para exportar'); return; }
+  const cols = ['id','conta','tipo','data','hora','membro','publicado','notas'];
+  const escape = v => {
+    if (v == null) return '';
+    const s = String(v);
+    return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g,'""')}"` : s;
+  };
+  const rows = [cols.join(','), ...posts.map(p => cols.map(c => escape(p[c])).join(','))];
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `mysticfyah-social-${today()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`${posts.length} posts exportados`);
+}
+
 async function addPost() {
   const conta  = document.getElementById('sc-conta').value;
   const tipo   = document.getElementById('sc-tipo').value;
@@ -2453,6 +2476,10 @@ function renderSocial() {
     filtered = filtered.filter(p => p.conta === socialFilter);
   } else if (['Reel','Post','Story','Carousel','Live'].includes(socialFilter)) {
     filtered = filtered.filter(p => p.tipo === socialFilter);
+  } else if (socialFilter === 'pendentes') {
+    filtered = filtered.filter(p => !p.publicado);
+  } else if (socialFilter === 'publicados') {
+    filtered = filtered.filter(p => p.publicado);
   }
 
   // Sort: pendentes first by date asc, then publicados by date desc
