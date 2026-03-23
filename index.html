@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mystic Fyah — Dashboard</title>
+<title>SUBCIETY — Management Tool</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -789,6 +789,27 @@
     flex-shrink: 0;
   }
   @media (max-width: 768px) { .mobile-menu-btn { display: flex; } }
+
+  /* ===== ARTISTAS ===== */
+  .artist-list { display: flex; flex-direction: column; gap: 10px; }
+  .artist-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: border-color 0.12s; }
+  .artist-card:hover { border-color: var(--border-bright); }
+  .artist-card-top { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 10px; gap: 12px; }
+  .artist-nome { font-size: 15px; font-weight: 600; color: var(--text); }
+  .artist-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 3px; }
+  .artist-genero { font-size: 11px; color: var(--text-muted); }
+  .artist-body { padding: 0 16px 14px; display: flex; flex-direction: column; gap: 10px; }
+  .artist-section-label { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; margin-bottom: 3px; }
+  .artist-bio { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+  .artist-press { font-size: 12px; color: var(--text-dim); line-height: 1.7; white-space: pre-wrap; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; }
+  .artist-links { display: flex; gap: 8px; flex-wrap: wrap; }
+  .artist-link { font-size: 11px; color: var(--accent-light); background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.2); border-radius: 4px; padding: 3px 9px; text-decoration: none; transition: background 0.1s; }
+  .artist-link:hover { background: rgba(124,58,237,0.16); }
+  .artist-press-toggle { font-size: 11px; color: var(--text-muted); cursor: pointer; background: none; border: none; padding: 0; text-align: left; }
+  .artist-press-toggle:hover { color: var(--text-dim); }
+  .badge-ativo     { background: rgba(34,197,94,0.12);  color: var(--green); border: 1px solid rgba(34,197,94,0.28); }
+  .badge-negocio   { background: rgba(249,115,22,0.12); color: #f97316;      border: 1px solid rgba(249,115,22,0.28); }
+  .badge-inativo   { background: rgba(107,107,107,0.12);color: var(--text-muted); border: 1px solid var(--border); }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -798,8 +819,8 @@
 
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-logo">
-    <div class="sidebar-logo-name">Mystic Fyah</div>
-    <div class="sidebar-logo-sub">Dashboard</div>
+    <div class="sidebar-logo-name">SUBCIETY</div>
+    <div class="sidebar-logo-sub">Management</div>
   </div>
   <div class="sidebar-nav">
     <button class="sidebar-item active" data-tab="agenda" onclick="switchTab('agenda')">
@@ -822,6 +843,9 @@
     </button>
     <button class="sidebar-item" data-tab="eventos" onclick="switchTab('eventos')">
       <span class="sidebar-icon">◈</span>Promotor
+    </button>
+    <button class="sidebar-item" data-tab="artistas" onclick="switchTab('artistas')">
+      <span class="sidebar-icon">◎</span>Artistas
     </button>
   </div>
   <div class="sidebar-footer">
@@ -1339,6 +1363,69 @@
     <div class="ev-org-list" id="eventos-list"></div>
   </section>
 
+  <!-- ===== ARTISTAS ===== -->
+  <section class="module" id="mod-artistas">
+    <div class="section-header">
+      <div>
+        <div class="section-title">Artistas</div>
+        <div class="section-subtitle">Roster SUBCIETY — press releases &amp; gestão</div>
+      </div>
+      <div class="section-count" id="artistas-count"></div>
+    </div>
+
+    <div class="cards-row" id="artistas-stats"></div>
+
+    <div class="form-panel collapsed" id="form-artistas">
+      <div class="form-title" onclick="toggleForm('form-artistas')">
+        <span>+ Adicionar Artista</span>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="form-body">
+        <div class="form-grid">
+          <div class="form-group" style="grid-column:span 2">
+            <label>Nome / Nome Artístico</label>
+            <input type="text" id="ar-nome" placeholder="ex: Dubio, Mystic Fyah, ...">
+          </div>
+          <div class="form-group">
+            <label>Género</label>
+            <input type="text" id="ar-genero" placeholder="ex: Reggae, Hip-Hop, Dub...">
+          </div>
+          <div class="form-group">
+            <label>Estado</label>
+            <select id="ar-estado">
+              <option>Ativo</option>
+              <option>Em Negociação</option>
+              <option>Inativo</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Instagram</label>
+            <input type="text" id="ar-instagram" placeholder="@handle">
+          </div>
+          <div class="form-group">
+            <label>Spotify / Link</label>
+            <input type="text" id="ar-spotify" placeholder="URL ou nome na plataforma">
+          </div>
+          <div class="form-group" style="grid-column:span 2">
+            <label>Bio Curta</label>
+            <textarea id="ar-bio" rows="2" placeholder="Uma ou duas frases sobre o artista..."></textarea>
+          </div>
+          <div class="form-group" style="grid-column:span 2">
+            <label>Press Release</label>
+            <textarea id="ar-press" rows="5" placeholder="Texto completo para imprensa, booking, etc..."></textarea>
+          </div>
+          <div class="form-group" style="grid-column:span 2">
+            <label>Notas Internas</label>
+            <textarea id="ar-notas" rows="2" placeholder="Observações, contactos, condições, etc..."></textarea>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="addArtista()">Adicionar</button>
+      </div>
+    </div>
+
+    <div class="artist-list" id="artistas-list"></div>
+  </section>
+
 
   </main>
 </div>
@@ -1362,7 +1449,7 @@ const sb = createClient(
 // STATE
 // ============================================================
 let events = [], tasks = [], transactions = [], dividas = [], abonoLog = [];
-let products = [], merchLog = [], posts = [], releases = [], orgEvents = [];
+let products = [], merchLog = [], posts = [], releases = [], orgEvents = [], artists = [];
 let taskAttachments = []; // { id, task_id, nome, url }
 
 const MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
@@ -1410,13 +1497,14 @@ async function loadTable(table) {
     case 'releases':   { const { data } = await q('releases','created_at', false);         releases   = data || [];      renderReleases(); break; }
     case 'org_events':        { const { data } = await q('org_events','created_at', false);        orgEvents        = data || [];      renderOrgEvents(); break; }
     case 'task_attachments':  { const { data } = await q('task_attachments','created_at', false);  taskAttachments  = data || [];      renderTasks();     break; }
+    case 'artists':           { const { data } = await q('artists','nome');                         artists          = data || [];      renderArtistas();  break; }
   }
 }
 
 async function loadAll() {
   showLoading(true);
   try {
-    const [ev, tk, tx, dv, ab, pr, ml, po, rl, oe, ta] = await Promise.all([
+    const [ev, tk, tx, dv, ab, pr, ml, po, rl, oe, ta, ar] = await Promise.all([
       sb.from('events').select('*').order('data'),
       sb.from('tasks').select('*').order('created_at'),
       sb.from('transactions').select('*').order('created_at', { ascending: false }),
@@ -1428,6 +1516,7 @@ async function loadAll() {
       sb.from('releases').select('*').order('created_at', { ascending: false }),
       sb.from('org_events').select('*').order('created_at', { ascending: false }),
       sb.from('task_attachments').select('*').order('created_at', { ascending: false }),
+      sb.from('artists').select('*').order('nome'),
     ]);
     events           = ev.data || [];
     tasks            = (tk.data || []).map(mapTask);
@@ -1440,7 +1529,8 @@ async function loadAll() {
     releases         = rl.data || [];
     orgEvents        = oe.data || [];
     taskAttachments  = ta.data || [];
-    renderAgenda(); renderTasks(); renderFinancas(); renderDividas(); renderMerch(); renderSocial(); renderReleases(); renderOrgEvents();
+    artists          = ar.data || [];
+    renderAgenda(); renderTasks(); renderFinancas(); renderDividas(); renderMerch(); renderSocial(); renderReleases(); renderOrgEvents(); renderArtistas();
   } catch (err) {
     console.error('loadAll error:', err);
     showToast('Erro ao carregar dados — verifica a ligação');
@@ -1450,7 +1540,7 @@ async function loadAll() {
 }
 
 function setupRealtime() {
-  const tables = ['events','tasks','transactions','dividas','abono_log','products','merch_log','posts','releases','org_events','task_attachments'];
+  const tables = ['events','tasks','transactions','dividas','abono_log','products','merch_log','posts','releases','org_events','task_attachments','artists'];
   const ch = sb.channel('db-realtime');
   tables.forEach(t => ch.on('postgres_changes', { event: '*', schema: 'public', table: t }, () => loadTable(t)));
   ch.subscribe(status => {
@@ -1476,7 +1566,7 @@ function toggleForm(id) {
   document.getElementById(id).classList.toggle('collapsed');
 }
 
-const TAB_LABELS = { agenda:'Agenda', tarefas:'Tarefas', financas:'Finanças', merch:'Merch', social:'Social', releases:'Releases', eventos:'Promotor' };
+const TAB_LABELS = { agenda:'Agenda', tarefas:'Tarefas', financas:'Finanças', merch:'Merch', social:'Social', releases:'Releases', eventos:'Promotor', artistas:'Artistas' };
 function switchTab(name) {
   document.querySelectorAll('.sidebar-item').forEach(t => {
     t.classList.toggle('active', t.dataset.tab === name);
@@ -3017,6 +3107,161 @@ if (localStorage.getItem('theme') === 'day') {
 }
 
 document.querySelectorAll('.form-panel').forEach(f => f.classList.add('collapsed'));
+// ============================================================
+// ARTISTAS
+// ============================================================
+const ARTIST_STATE_CLS = { 'Ativo': 'badge-ativo', 'Em Negociação': 'badge-negocio', 'Inativo': 'badge-inativo' };
+
+let expandedPressIds = new Set();
+
+function togglePress(id) {
+  if (expandedPressIds.has(id)) expandedPressIds.delete(id);
+  else expandedPressIds.add(id);
+  renderArtistas();
+}
+
+let editingArtistId = null;
+
+function startEditArtist(id) {
+  editingArtistId = editingArtistId === id ? null : id;
+  renderArtistas();
+}
+
+async function addArtista() {
+  const nome  = document.getElementById('ar-nome').value.trim();
+  if (!nome) { showToast('Insere um nome'); return; }
+  const payload = {
+    nome,
+    genero:        document.getElementById('ar-genero').value.trim(),
+    estado:        document.getElementById('ar-estado').value,
+    instagram:     document.getElementById('ar-instagram').value.trim(),
+    spotify:       document.getElementById('ar-spotify').value.trim(),
+    bio:           document.getElementById('ar-bio').value.trim(),
+    press_release: document.getElementById('ar-press').value.trim(),
+    notas:         document.getElementById('ar-notas').value.trim(),
+  };
+  const { error } = await sb.from('artists').insert(payload);
+  if (error) { showToast('Erro: ' + error.message); return; }
+  ['ar-nome','ar-genero','ar-instagram','ar-spotify','ar-bio','ar-press','ar-notas'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('ar-estado').value = 'Ativo';
+  document.getElementById('form-artistas').classList.add('collapsed');
+  showToast('Artista adicionado');
+}
+
+async function deleteArtista(id) {
+  if (!confirm('Apagar artista?')) return;
+  await sb.from('artists').delete().eq('id', id);
+}
+
+async function saveEditArtist(id) {
+  const payload = {
+    nome:          document.getElementById(`ea-nome-${id}`).value.trim(),
+    genero:        document.getElementById(`ea-genero-${id}`).value.trim(),
+    estado:        document.getElementById(`ea-estado-${id}`).value,
+    instagram:     document.getElementById(`ea-instagram-${id}`).value.trim(),
+    spotify:       document.getElementById(`ea-spotify-${id}`).value.trim(),
+    bio:           document.getElementById(`ea-bio-${id}`).value.trim(),
+    press_release: document.getElementById(`ea-press-${id}`).value.trim(),
+    notas:         document.getElementById(`ea-notas-${id}`).value.trim(),
+  };
+  if (!payload.nome) { showToast('Nome obrigatório'); return; }
+  const { error } = await sb.from('artists').update(payload).eq('id', id);
+  if (error) { showToast('Erro: ' + error.message); return; }
+  editingArtistId = null;
+  showToast('Guardado');
+}
+
+function renderArtistas() {
+  const listEl  = document.getElementById('artistas-list');
+  const countEl = document.getElementById('artistas-count');
+  const statsEl = document.getElementById('artistas-stats');
+  if (!listEl) return;
+
+  const ativos   = artists.filter(a => a.estado === 'Ativo').length;
+  const negocio  = artists.filter(a => a.estado === 'Em Negociação').length;
+
+  countEl.textContent = `${artists.length} artistas`;
+  setTopbarCount(countEl.textContent);
+
+  statsEl.innerHTML = `
+    <div class="stat-card"><div class="stat-label">Ativos</div><div class="stat-value">${ativos}</div></div>
+    <div class="stat-card"><div class="stat-label">Em Negociação</div><div class="stat-value">${negocio}</div></div>
+    <div class="stat-card"><div class="stat-label">Total Roster</div><div class="stat-value">${artists.length}</div></div>`;
+
+  if (!artists.length) {
+    listEl.innerHTML = '<div class="empty-state"><div class="empty-icon">◎</div>Nenhum artista registado.</div>';
+    return;
+  }
+
+  listEl.innerHTML = artists.map(a => {
+    const badgeCls = ARTIST_STATE_CLS[a.estado] || 'badge-inativo';
+    const pressExpanded = expandedPressIds.has(a.id);
+    const isEditing = editingArtistId === a.id;
+
+    if (isEditing) {
+      return `
+      <div class="artist-card">
+        <div class="artist-card-top">
+          <div><div class="artist-nome">✎ Editar: ${a.nome}</div></div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-primary btn-sm" style="font-size:11px;padding:4px 10px" onclick="saveEditArtist(${a.id})">Guardar</button>
+            <button class="btn btn-outline btn-sm" style="font-size:11px;padding:4px 8px" onclick="startEditArtist(${a.id})">Cancelar</button>
+          </div>
+        </div>
+        <div class="artist-body">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px">
+            <div class="form-group" style="grid-column:span 2"><label>Nome</label><input type="text" id="ea-nome-${a.id}" value="${a.nome||''}"></div>
+            <div class="form-group"><label>Género</label><input type="text" id="ea-genero-${a.id}" value="${a.genero||''}"></div>
+            <div class="form-group"><label>Estado</label><select id="ea-estado-${a.id}">${['Ativo','Em Negociação','Inativo'].map(s=>`<option ${a.estado===s?'selected':''}>${s}</option>`).join('')}</select></div>
+            <div class="form-group"><label>Instagram</label><input type="text" id="ea-instagram-${a.id}" value="${a.instagram||''}"></div>
+            <div class="form-group"><label>Spotify / Link</label><input type="text" id="ea-spotify-${a.id}" value="${a.spotify||''}"></div>
+            <div class="form-group" style="grid-column:span 2"><label>Bio Curta</label><textarea id="ea-bio-${a.id}" rows="2">${a.bio||''}</textarea></div>
+            <div class="form-group" style="grid-column:span 2"><label>Press Release</label><textarea id="ea-press-${a.id}" rows="6">${a.press_release||''}</textarea></div>
+            <div class="form-group" style="grid-column:span 2"><label>Notas Internas</label><textarea id="ea-notas-${a.id}" rows="2">${a.notas||''}</textarea></div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    return `
+    <div class="artist-card">
+      <div class="artist-card-top">
+        <div>
+          <div class="artist-nome">${a.nome}</div>
+          <div class="artist-meta">
+            <span class="badge ${badgeCls}" style="font-size:9px">${a.estado}</span>
+            ${a.genero ? `<span class="artist-genero">${a.genero}</span>` : ''}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+          <button class="btn btn-outline btn-sm" style="padding:3px 7px;font-size:11px" onclick="startEditArtist(${a.id})">✎</button>
+          <button class="btn btn-outline btn-sm" style="padding:3px 7px;font-size:11px" onclick="deleteArtista(${a.id})">×</button>
+        </div>
+      </div>
+      <div class="artist-body">
+        ${a.bio ? `<div><div class="artist-section-label">Bio</div><div class="artist-bio">${a.bio}</div></div>` : ''}
+        ${(a.instagram || a.spotify) ? `
+        <div>
+          <div class="artist-section-label">Links</div>
+          <div class="artist-links">
+            ${a.instagram ? `<a class="artist-link" href="https://instagram.com/${a.instagram.replace('@','')}" target="_blank">Instagram ${a.instagram}</a>` : ''}
+            ${a.spotify   ? `<a class="artist-link" href="${a.spotify.startsWith('http') ? a.spotify : 'https://open.spotify.com/search/'+encodeURIComponent(a.spotify)}" target="_blank">Spotify / Link</a>` : ''}
+          </div>
+        </div>` : ''}
+        ${a.press_release ? `
+        <div>
+          <div class="artist-section-label">Press Release</div>
+          ${pressExpanded
+            ? `<div class="artist-press">${a.press_release}</div>
+               <button class="artist-press-toggle" onclick="togglePress(${a.id})">▲ Recolher</button>`
+            : `<button class="artist-press-toggle" onclick="togglePress(${a.id})">▶ Ver press release</button>`}
+        </div>` : ''}
+        ${a.notas ? `<div><div class="artist-section-label">Notas Internas</div><div class="artist-bio" style="color:var(--text-muted)">${a.notas}</div></div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
 setCurrentDate();
 loadAll();
 setupRealtime();
