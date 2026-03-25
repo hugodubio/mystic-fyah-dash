@@ -1749,11 +1749,13 @@ async function addEvent() {
   ['ev-nome','ev-local','ev-data','ev-hora','ev-link'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('form-agenda').classList.add('collapsed');
   showToast('Evento adicionado');
+  loadTable('events');
 }
 
 async function removeEvent(id) {
   await sb.from('events').delete().eq('id', id);
   showToast('Evento removido');
+  loadTable('events');
 }
 
 function startEditAgenda(id) {
@@ -1772,6 +1774,7 @@ async function saveAgenda(id) {
   await sb.from('events').update({ nome, local, hora, data, estado, link }).eq('id', id);
   editingAgendaId = null;
   showToast('Evento actualizado');
+  loadTable('events');
 }
 
 function gcalUrl(e) {
@@ -1907,12 +1910,14 @@ async function addTask() {
   document.getElementById('tk-obs').value  = '';
   document.getElementById('form-tarefas').classList.add('collapsed');
   showToast('Tarefa adicionada');
+  loadTable('tasks');
 }
 
 async function deleteTask(id, e) {
   e.stopPropagation();
   await sb.from('tasks').delete().eq('id', id);
   showToast('Tarefa removida');
+  loadTable('tasks');
 }
 
 function startEditTask(id, e) {
@@ -1932,6 +1937,7 @@ async function saveTask(id, e) {
   await sb.from('tasks').update({ descricao, membro, prio, grupo, observacoes }).eq('id', id);
   editingTaskId = null;
   showToast('Tarefa actualizada');
+  loadTable('tasks');
 }
 
 async function toggleTask(id) {
@@ -2063,11 +2069,13 @@ async function addTransaction() {
   document.getElementById('tx-valor').value = '';
   document.getElementById('form-financas').classList.add('collapsed');
   showToast('Movimento registado');
+  loadTable('transactions');
 }
 
 async function deleteTransaction(id) {
   await sb.from('transactions').delete().eq('id', id);
   showToast('Movimento removido');
+  loadTable('transactions');
 }
 
 function startEditTx(id) {
@@ -2085,6 +2093,7 @@ async function saveTx(id) {
   await sb.from('transactions').update({ descricao, valor, tipo, cat, data }).eq('id', id);
   editingTxId = null;
   showToast('Movimento actualizado');
+  loadTable('transactions');
 }
 
 const TX_CATS = ['Cachê','Merch','Equipamento','Transporte','Produção','Outro'];
@@ -2250,6 +2259,7 @@ async function addDivida() {
   document.getElementById('dv-valor').value = '';
   document.getElementById('form-dividas').classList.add('collapsed');
   showToast('Adiantamento registado');
+  loadTable('dividas');
 }
 
 async function deleteDivida(id) {
@@ -2259,6 +2269,8 @@ async function deleteDivida(id) {
   await sb.from('abono_log').delete().eq('divida_id', id);
   await sb.from('dividas').delete().eq('id', id);
   showToast(`Adiantamento de ${d.credor} removido`);
+  loadTable('dividas');
+  loadTable('abono_log');
 }
 
 function startEditDivida(id) {
@@ -2275,6 +2287,7 @@ async function saveDivida(id) {
   await sb.from('dividas').update({ descricao, credor, valor, data }).eq('id', id);
   editingDividaId = null;
   showToast('Adiantamento actualizado');
+  loadTable('dividas');
 }
 
 async function addAbono(id) {
@@ -2297,6 +2310,8 @@ async function addAbono(id) {
   notaEl.value = '';
   if (newPago >= Number(d.valor)) showToast(`Dívida saldada — ${d.credor} ✓`);
   else showToast(`Abono registado — ${fmtCurrency(aplicado)}`);
+  loadTable('dividas');
+  loadTable('abono_log');
 }
 
 function renderDividas() {
@@ -2481,6 +2496,7 @@ async function quickSale() {
 async function deleteProduct(id) {
   await sb.from('products').delete().eq('id', id);
   showToast('Produto removido');
+  loadTable('products');
 }
 
 function startEditProduct(id) {
@@ -2497,6 +2513,7 @@ async function saveProduct(id) {
   await sb.from('products').update({ nome, var: varnt, preco, stock }).eq('id', id);
   editingProductId = null;
   showToast('Produto actualizado');
+  loadTable('products');
 }
 
 async function addProduct() {
@@ -2512,6 +2529,7 @@ async function addProduct() {
   ['mp-nome','mp-var','mp-preco','mp-stock'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('form-merch').classList.add('collapsed');
   showToast('Produto adicionado');
+  loadTable('products');
 }
 
 function renderMerch() {
@@ -2692,6 +2710,7 @@ async function addPost() {
   document.getElementById('sc-hora').value = '';
   document.getElementById('form-social').classList.add('collapsed');
   showToast('Publicação agendada');
+  loadTable('posts');
 }
 
 async function togglePublicado(id) {
@@ -2711,6 +2730,7 @@ async function togglePublicado(id) {
 async function deletePost(id) {
   await sb.from('posts').delete().eq('id', id);
   showToast('Publicação removida');
+  loadTable('posts');
 }
 
 function renderSocial() {
@@ -2882,6 +2902,7 @@ async function savePost(id) {
   await sb.from('posts').update({ conta, tipo, data, hora, notas, membro }).eq('id', id);
   editingPostId = null;
   showToast('Publicação actualizada');
+  loadTable('posts');
 }
 
 function editPostForm(p) {
@@ -2948,11 +2969,13 @@ async function addRelease() {
   ['rl-titulo','rl-data','rl-obs'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('form-releases').classList.add('collapsed');
   showToast('Release adicionada');
+  loadTable('releases');
 }
 
 async function deleteRelease(id) {
   await sb.from('releases').delete().eq('id', id);
   showToast('Release removida');
+  loadTable('releases');
 }
 
 function startEditRelease(id) {
@@ -2971,6 +2994,7 @@ async function saveRelease(id) {
   await sb.from('releases').update({ titulo, tipo, estado, data_prevista, observacoes }).eq('id', id);
   editingReleaseId = null;
   showToast('Release actualizada');
+  loadTable('releases');
 }
 
 function renderReleases() {
@@ -3074,11 +3098,13 @@ async function addOrgEvent() {
   ['ev2-nome','ev2-data','ev2-local','ev2-orc','ev2-obs'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('form-eventos').classList.add('collapsed');
   showToast('Evento adicionado');
+  loadTable('org_events');
 }
 
 async function deleteOrgEvent(id) {
   await sb.from('org_events').delete().eq('id', id);
   showToast('Evento removido');
+  loadTable('org_events');
 }
 
 function startEditEvent(id) {
@@ -3098,6 +3124,7 @@ async function saveOrgEvent(id) {
   await sb.from('org_events').update({ nome, tipo, estado, data_prevista, local, orcamento, observacoes }).eq('id', id);
   editingEventId = null;
   showToast('Evento actualizado');
+  loadTable('org_events');
 }
 
 function renderOrgEvents() {
@@ -3306,11 +3333,13 @@ async function addArtista() {
   document.getElementById('ar-estado').value = 'Ativo';
   document.getElementById('form-artistas').classList.add('collapsed');
   showToast('Artista adicionado');
+  loadTable('artists');
 }
 
 async function deleteArtista(id) {
   if (!confirm('Apagar artista?')) return;
   await sb.from('artists').delete().eq('id', id);
+  loadTable('artists');
 }
 
 async function saveEditArtist(id) {
@@ -3329,6 +3358,7 @@ async function saveEditArtist(id) {
   if (error) { showToast('Erro: ' + error.message); return; }
   editingArtistId = null;
   showToast('Guardado');
+  loadTable('artists');
 }
 
 function renderArtistas() {
@@ -3476,11 +3506,13 @@ async function addLabelReceita() {
   document.getElementById('lr-pct-label').value = '30';
   document.getElementById('form-label-receita').classList.add('collapsed');
   showToast('Receita registada');
+  loadTable('label_receitas');
 }
 
 async function deleteLabelReceita(id) {
   if (!confirm('Apagar receita?')) return;
   await sb.from('label_receitas').delete().eq('id', id);
+  loadTable('label_receitas');
 }
 
 async function addLabelPagamento() {
@@ -3500,11 +3532,13 @@ async function addLabelPagamento() {
   document.getElementById('lp-desc').value = '';
   document.getElementById('form-label-pagamento').classList.add('collapsed');
   showToast('Pagamento registado');
+  loadTable('label_pagamentos');
 }
 
 async function deleteLabelPagamento(id) {
   if (!confirm('Apagar pagamento?')) return;
   await sb.from('label_pagamentos').delete().eq('id', id);
+  loadTable('label_pagamentos');
 }
 
 function calcLabelSaldos() {
