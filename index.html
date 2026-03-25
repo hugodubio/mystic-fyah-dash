@@ -1936,7 +1936,12 @@ async function saveTask(id, e) {
 
 async function toggleTask(id) {
   const t = tasks.find(t => t.id === id);
-  if (t) await sb.from('tasks').update({ done: !t.done }).eq('id', id);
+  if (!t) return;
+  const prev = t.done;
+  t.done = !prev;
+  renderTasks();
+  const { error } = await sb.from('tasks').update({ done: t.done }).eq('id', id);
+  if (error) { t.done = prev; renderTasks(); showToast('Erro ao atualizar tarefa'); }
 }
 
 function renderTasks() {
@@ -2691,7 +2696,16 @@ async function addPost() {
 
 async function togglePublicado(id) {
   const p = posts.find(p => p.id === id);
-  if (p) await sb.from('posts').update({ publicado: !p.publicado }).eq('id', id);
+  if (!p) return;
+  const novoEstado = !p.publicado;
+  p.publicado = novoEstado;
+  renderSocial();
+  const { error } = await sb.from('posts').update({ publicado: novoEstado }).eq('id', id);
+  if (error) {
+    p.publicado = !novoEstado;
+    renderSocial();
+    showToast('Erro ao atualizar');
+  }
 }
 
 async function deletePost(id) {
