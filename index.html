@@ -692,7 +692,8 @@
   .type-live    { background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.28); }
   .btn-publish { font-family: 'Inter', system-ui, sans-serif; font-size: 10px; letter-spacing: 0.06em; padding: 4px 10px; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text-muted); border-radius: var(--radius-sm); transition: border-color 0.12s, color 0.12s, background 0.12s; white-space: nowrap; font-weight: 500; }
   .btn-publish:hover { border-color: var(--green); color: var(--green); background: rgba(34,197,94,0.05); }
-  .post-card.publicado .btn-publish { color: var(--text-muted); border-color: var(--border); cursor: default; }
+  .post-card.publicado .btn-publish { color: var(--green); border-color: rgba(34,197,94,0.3); cursor: pointer; }
+  .post-card.publicado .btn-publish:hover { color: var(--red); border-color: var(--red); background: rgba(239,68,68,0.05); }
   .social-legend { display: flex; gap: 14px; margin-left: auto; flex-wrap: wrap; }
   .legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--text-muted); }
   .legend-dot { width: 7px; height: 7px; border-radius: 50%; }
@@ -1960,7 +1961,7 @@ function renderTasks() {
 
   const groups = ['Esta semana', 'A fazer'];
   const prioMap = { Urgente: 'urgente', Médio: 'medio', Normal: 'normal' };
-  const memberClass = m => 'member-' + m.toLowerCase();
+  const memberClass = m => 'member-' + (m || '').toLowerCase();
 
   let html = '';
   groups.forEach(g => {
@@ -2346,7 +2347,7 @@ function renderDividas() {
     return;
   }
 
-  const memberClass = m => 'member-' + m.toLowerCase();
+  const memberClass = m => 'member-' + (m || '').toLowerCase();
   const statusLabel = { pendente: 'Pendente', parcial: 'Parcial', saldado: 'Saldado' };
   const statusBadgeCls = { pendente: 'pendente-d', parcial: 'parcial', saldado: 'saldado' };
 
@@ -2766,7 +2767,7 @@ function renderSocial() {
     return;
   }
 
-  const memberClass = m => 'member-' + m.toLowerCase();
+  const memberClass = m => 'member-' + (m || '').toLowerCase();
 
   if (socialView === 'list') {
     grid.className = 'post-list';
@@ -2793,11 +2794,11 @@ function renderSocial() {
         <div class="post-list-notes">${p.notas || '<span style="color:var(--text-muted);font-style:italic">—</span>'}</div>
         <div class="list-member-col">
           <div class="member-chip member-${memberClass(p.membro)}" style="font-size:10px">
-            <div class="member-dot" style="width:16px;height:16px;font-size:8px">${p.membro[0]}</div>
+            <div class="member-dot" style="width:16px;height:16px;font-size:8px">${(p.membro || '—')[0]}</div>
           </div>
         </div>
         <div style="display:flex;gap:5px;align-items:center;flex-shrink:0">
-          <button class="btn-publish" style="font-size:11px;padding:3px 8px" onclick="togglePublicado(${p.id})">
+          <button class="btn-publish" style="font-size:11px;padding:3px 8px" onclick="togglePublicado(${p.id})" title="${p.publicado ? 'Clica para reabrir' : 'Marcar como publicado'}">
             ${p.publicado ? '✓' : 'Publicar'}
           </button>
           <button class="btn btn-outline btn-sm" style="padding:3px 7px;font-size:11px" onclick="startEditPost(${p.id})" title="Editar">✎</button>
@@ -2825,8 +2826,8 @@ function renderSocial() {
           </div>
           <div style="display:flex;gap:6px;align-items:center">
             <div class="member-chip member-${memberClass(p.membro)}" style="font-size:10px">
-              <div class="member-dot" style="width:16px;height:16px;font-size:8px">${p.membro[0]}</div>
-              <span>${p.membro}</span>
+              <div class="member-dot" style="width:16px;height:16px;font-size:8px">${(p.membro || '—')[0]}</div>
+              <span>${p.membro || '—'}</span>
             </div>
             <button class="btn btn-outline btn-sm" style="padding:3px 7px;font-size:11px" onclick="startEditPost(${p.id})" title="Editar">✎</button>
             <button class="btn btn-outline btn-sm" style="padding:3px 7px;font-size:11px" onclick="deletePost(${p.id})">×</button>
@@ -2843,7 +2844,7 @@ function renderSocial() {
         </div>
         <div class="post-footer">
           <span class="post-type-badge ${TYPE_CLS[p.tipo] || 'type-post'}">${TYPE_ICON[p.tipo] || '◼'} ${p.tipo}</span>
-          <button class="btn-publish" onclick="togglePublicado(${p.id})">
+          <button class="btn-publish" onclick="togglePublicado(${p.id})" title="${p.publicado ? 'Clica para reabrir' : 'Marcar como publicado'}">
             ${p.publicado ? '✓ Publicado' : 'Marcar publicado'}
           </button>
         </div>`}
