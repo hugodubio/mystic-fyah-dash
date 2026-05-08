@@ -1038,6 +1038,24 @@
               <option value="Cancelado">Cancelado</option>
             </select>
           </div>
+          <div class="form-group">
+            <label>Tipo</label>
+            <select id="ev-tipo">
+              <option value="Gig">Gig</option>
+              <option value="Aluguer Sound System">Aluguer Sound System</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Artista</label>
+            <select id="ev-artista">
+              <option value="">— selecionar —</option>
+              <option value="Mystic Fyah">Mystic Fyah</option>
+              <option value="Sr Dubong">Sr Dubong</option>
+              <option value="Delmighty Sounds">Delmighty Sounds</option>
+              <option value="Medi Sound Station">Medi Sound Station</option>
+              <option value="Sista Lisa">Sista Lisa</option>
+            </select>
+          </div>
           <div class="form-group" style="grid-column: span 2">
             <label>Link (opcional)</label>
             <input type="url" id="ev-link" placeholder="https://...">
@@ -1829,18 +1847,21 @@ function setTopbarCount(text) {
 // ============================================================
 
 async function addEvent() {
-  const nome  = document.getElementById('ev-nome').value.trim();
-  const local = document.getElementById('ev-local').value.trim();
-  const data  = document.getElementById('ev-data').value;
-  const hora  = document.getElementById('ev-hora').value;
-  const estado= document.getElementById('ev-estado').value;
-  const link  = document.getElementById('ev-link').value.trim();
+  const nome   = document.getElementById('ev-nome').value.trim();
+  const local  = document.getElementById('ev-local').value.trim();
+  const data   = document.getElementById('ev-data').value;
+  const hora   = document.getElementById('ev-hora').value;
+  const estado = document.getElementById('ev-estado').value;
+  const tipo   = document.getElementById('ev-tipo').value;
+  const link   = document.getElementById('ev-link').value.trim();
+  const artista= document.getElementById('ev-artista').value;
 
   if (!nome || !data) { showToast('Preenche o nome e a data'); return; }
 
-  const { error } = await sb.from('events').insert({ nome, local, hora, data, estado, link });
+  const { error } = await sb.from('events').insert({ nome, local, hora, data, estado, tipo, link, artista });
   if (error) { showToast('Erro ao guardar'); return; }
   ['ev-nome','ev-local','ev-data','ev-hora','ev-link'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('ev-artista').value = '';
   document.getElementById('form-agenda').classList.add('collapsed');
   showToast('Evento adicionado');
   loadTable('events');
@@ -1858,14 +1879,16 @@ function startEditAgenda(id) {
 }
 
 async function saveAgenda(id) {
-  const nome   = document.getElementById(`ea-nome-${id}`).value.trim();
-  const local  = document.getElementById(`ea-local-${id}`).value.trim();
-  const data   = document.getElementById(`ea-data-${id}`).value;
-  const hora   = document.getElementById(`ea-hora-${id}`).value;
-  const estado = document.getElementById(`ea-estado-${id}`).value;
-  const link   = document.getElementById(`ea-link-${id}`).value.trim();
+  const nome    = document.getElementById(`ea-nome-${id}`).value.trim();
+  const local   = document.getElementById(`ea-local-${id}`).value.trim();
+  const data    = document.getElementById(`ea-data-${id}`).value;
+  const hora    = document.getElementById(`ea-hora-${id}`).value;
+  const estado  = document.getElementById(`ea-estado-${id}`).value;
+  const tipo    = document.getElementById(`ea-tipo-${id}`).value;
+  const link    = document.getElementById(`ea-link-${id}`).value.trim();
+  const artista = document.getElementById(`ea-artista-${id}`).value;
   if (!nome || !data) { showToast('Nome e data obrigatórios'); return; }
-  await sb.from('events').update({ nome, local, hora, data, estado, link }).eq('id', id);
+  await sb.from('events').update({ nome, local, hora, data, estado, tipo, link, artista }).eq('id', id);
   editingAgendaId = null;
   showToast('Evento actualizado');
   loadTable('events');
@@ -1948,6 +1971,19 @@ function renderAgenda() {
                 ${['Confirmado','Headliner','Pendente','Cancelado'].map(s=>`<option ${e.estado===s?'selected':''}>${s}</option>`).join('')}
               </select>
             </div>
+            <div class="form-group" style="margin:0">
+              <label>Tipo</label>
+              <select id="ea-tipo-${e.id}">
+                ${['Gig','Aluguer Sound System'].map(t=>`<option ${(e.tipo||'Gig')===t?'selected':''}>${t}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label>Artista</label>
+              <select id="ea-artista-${e.id}">
+                <option value="">— nenhum —</option>
+                ${['Mystic Fyah','Sr Dubong','Delmighty Sounds','Medi Sound Station','Sista Lisa'].map(a=>`<option ${e.artista===a?'selected':''}>${a}</option>`).join('')}
+              </select>
+            </div>
             <div class="form-group" style="margin:0;grid-column:span 2">
               <label>Link</label>
               <input type="url" id="ea-link-${e.id}" value="${(e.link||'').replace(/"/g,'&quot;')}">
@@ -1967,8 +2003,11 @@ function renderAgenda() {
           <div class="event-month">${MONTHS[d.getMonth()]}</div>
         </div>
         <div style="flex:1;min-width:0">
-          <div class="event-name">${e.nome}</div>
-          <div class="event-location">${e.local||''}${e.hora ? ' · ' + e.hora : ''}</div>
+          <div class="event-name" style="display:flex;align-items:center;gap:6px">
+            ${e.nome}
+            ${e.tipo==='Aluguer Sound System' ? '<span style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;background:rgba(34,197,94,0.1);color:#22c55e;border:1px solid rgba(34,197,94,0.25);border-radius:3px;padding:1px 6px;font-weight:600">🔊 Aluguer</span>' : ''}
+          </div>
+          <div class="event-location">${e.local||''}${e.hora ? ' · ' + e.hora : ''}${e.artista ? ' · ' + e.artista : ''}</div>
         </div>
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           ${statusBadge(e.estado)}
