@@ -2139,6 +2139,8 @@ function renderCal() {
 
   // Build set of event days for quick lookup
   // For multi-day events, expand to all days
+  const localDateStr = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
   function eventDaysInMonth(e) {
     const start = e.data;
     const end   = e.data_fim || e.data;
@@ -2146,7 +2148,7 @@ function renderCal() {
     let cur = new Date(start + 'T00:00:00');
     const endD  = new Date(end  + 'T00:00:00');
     while (cur <= endD) {
-      const s = cur.toISOString().slice(0,10);
+      const s = localDateStr(cur);
       if (s.startsWith(`${calYear}-${String(calMonth+1).padStart(2,'0')}`)) days.push(s);
       cur.setDate(cur.getDate() + 1);
     }
