@@ -572,6 +572,43 @@
   .event-month { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); }
   .event-name { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.2; }
   .event-location { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .event-notas { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-style: italic; opacity: 0.8; }
+
+  /* AGENDA TOOLBAR */
+  .agenda-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .agenda-search { flex: 1; min-width: 160px; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: var(--radius-sm); padding: 7px 12px; font-size: 13px; outline: none; }
+  .agenda-search:focus { border-color: var(--accent); }
+  .view-toggle { display: flex; gap: 2px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 2px; }
+  .view-toggle button { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px 10px; border-radius: 3px; font-size: 13px; transition: background 0.12s, color 0.12s; }
+  .view-toggle button.active { background: var(--accent); color: #fff; }
+
+  /* CALENDAR VIEW */
+  .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .cal-nav-title { font-family: 'Space Mono', monospace; font-size: 14px; color: var(--text); letter-spacing: 0.08em; text-transform: uppercase; }
+  .cal-nav button { background: var(--surface); border: 1px solid var(--border); color: var(--text); cursor: pointer; border-radius: var(--radius-sm); padding: 4px 12px; font-size: 14px; }
+  .cal-nav button:hover { border-color: var(--accent); color: var(--accent); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .cal-dow { text-align: center; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); padding: 4px 0 8px; font-weight: 600; }
+  .cal-cell { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); min-height: 72px; padding: 6px 5px; position: relative; transition: border-color 0.12s; }
+  .cal-cell.today { border-color: var(--accent); }
+  .cal-cell.other-month { opacity: 0.35; }
+  .cal-cell-day { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+  .cal-cell.today .cal-cell-day { color: var(--accent-light); font-weight: 700; }
+  .cal-pill { font-size: 10px; line-height: 1.3; padding: 2px 5px; border-radius: 3px; margin-bottom: 2px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+  .cal-pill.confirmado { background: rgba(124,58,237,0.22); color: var(--accent-light); border: 1px solid rgba(124,58,237,0.3); }
+  .cal-pill.headliner { background: rgba(251,191,36,0.18); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+  .cal-pill.pendente { background: rgba(99,102,241,0.14); color: #818cf8; border: 1px solid rgba(99,102,241,0.25); }
+  .cal-pill.cancelado { background: rgba(239,68,68,0.12); color: var(--red); border: 1px solid rgba(239,68,68,0.2); text-decoration: line-through; }
+  .cal-pill.multiday { border-radius: 0; margin-left: -5px; margin-right: -5px; padding-left: 7px; }
+  .cal-pill.multiday-start { border-radius: 3px 0 0 3px; margin-right: -5px; padding-left: 7px; }
+  .cal-pill.multiday-end { border-radius: 0 3px 3px 0; margin-left: -5px; padding-left: 4px; }
+
+  /* EVENT DETAIL POPUP */
+  .event-popup { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .event-popup-box { background: var(--surface2); border: 1px solid var(--border-bright); border-radius: var(--radius); padding: 24px; max-width: 420px; width: 100%; }
+  .event-popup-title { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+  .event-popup-row { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+  .event-popup-row strong { color: var(--text); margin-right: 6px; }
 
   /* GROUP HEADER */
   .group-header {
@@ -1017,13 +1054,17 @@
             <label>Nome do Evento</label>
             <input type="text" id="ev-nome" placeholder="ex: Soundsystem Nights">
           </div>
-          <div class="form-group">
-            <label>Local</label>
+          <div class="form-group" style="grid-column: span 2">
+            <label>Local / Venue</label>
             <input type="text" id="ev-local" placeholder="ex: Musicbox, Lisboa">
           </div>
           <div class="form-group">
-            <label>Data</label>
+            <label>Data Início</label>
             <input type="date" id="ev-data">
+          </div>
+          <div class="form-group">
+            <label>Data Fim <span style="color:var(--text-muted);font-weight:400">(opcional)</span></label>
+            <input type="date" id="ev-data-fim">
           </div>
           <div class="form-group">
             <label>Hora</label>
@@ -1042,6 +1083,7 @@
             <label>Tipo</label>
             <select id="ev-tipo">
               <option value="Gig">Gig</option>
+              <option value="Festival">Festival</option>
               <option value="Aluguer Sound System">Aluguer Sound System</option>
             </select>
           </div>
@@ -1060,12 +1102,24 @@
             <label>Link (opcional)</label>
             <input type="url" id="ev-link" placeholder="https://...">
           </div>
+          <div class="form-group" style="grid-column: span 2">
+            <label>Notas</label>
+            <textarea id="ev-notas" placeholder="Rider, contacto, logística..." rows="2" style="resize:vertical"></textarea>
+          </div>
         </div>
         <button class="btn btn-primary" onclick="addEvent()">Registar Evento</button>
       </div>
     </div>
 
+    <div class="agenda-toolbar">
+      <input type="text" class="agenda-search" id="agenda-search" placeholder="🔍 Pesquisar por nome ou venue..." oninput="renderAgenda()">
+      <div class="view-toggle">
+        <button id="btn-view-list" class="active" onclick="setAgendaView('list')">☰ Lista</button>
+        <button id="btn-view-cal" onclick="setAgendaView('cal')">⊞ Calendário</button>
+      </div>
+    </div>
     <div id="events-list"></div>
+    <div id="events-cal" style="display:none"></div>
   </section>
 
   <!-- ===== TAREFAS ===== -->
@@ -1846,21 +1900,37 @@ function setTopbarCount(text) {
 // AGENDA
 // ============================================================
 
+let agendaView = 'list';
+let calMonth = new Date().getMonth();
+let calYear = new Date().getFullYear();
+
+function setAgendaView(v) {
+  agendaView = v;
+  document.getElementById('btn-view-list').classList.toggle('active', v === 'list');
+  document.getElementById('btn-view-cal').classList.toggle('active', v === 'cal');
+  document.getElementById('events-list').style.display = v === 'list' ? '' : 'none';
+  document.getElementById('events-cal').style.display  = v === 'cal'  ? '' : 'none';
+  if (v === 'cal') renderCal();
+}
+
 async function addEvent() {
-  const nome   = document.getElementById('ev-nome').value.trim();
-  const local  = document.getElementById('ev-local').value.trim();
-  const data   = document.getElementById('ev-data').value;
-  const hora   = document.getElementById('ev-hora').value;
-  const estado = document.getElementById('ev-estado').value;
-  const tipo   = document.getElementById('ev-tipo').value;
-  const link   = document.getElementById('ev-link').value.trim();
-  const artista= document.getElementById('ev-artista').value;
+  const nome     = document.getElementById('ev-nome').value.trim();
+  const local    = document.getElementById('ev-local').value.trim();
+  const data     = document.getElementById('ev-data').value;
+  const data_fim = document.getElementById('ev-data-fim').value || null;
+  const hora     = document.getElementById('ev-hora').value;
+  const estado   = document.getElementById('ev-estado').value;
+  const tipo     = document.getElementById('ev-tipo').value;
+  const link     = document.getElementById('ev-link').value.trim();
+  const artista  = document.getElementById('ev-artista').value;
+  const notas    = document.getElementById('ev-notas').value.trim() || null;
 
   if (!nome || !data) { showToast('Preenche o nome e a data'); return; }
+  if (data_fim && data_fim < data) { showToast('Data fim não pode ser anterior ao início'); return; }
 
-  const { error } = await sb.from('events').insert({ nome, local, hora, data, estado, tipo, link, artista });
+  const { error } = await sb.from('events').insert({ nome, local, hora, data, data_fim, estado, tipo, link, artista, notas });
   if (error) { showToast('Erro ao guardar'); return; }
-  ['ev-nome','ev-local','ev-data','ev-hora','ev-link'].forEach(id => document.getElementById(id).value = '');
+  ['ev-nome','ev-local','ev-data','ev-data-fim','ev-hora','ev-link','ev-notas'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('ev-artista').value = '';
   document.getElementById('form-agenda').classList.add('collapsed');
   showToast('Evento adicionado');
@@ -1879,47 +1949,44 @@ function startEditAgenda(id) {
 }
 
 async function saveAgenda(id) {
-  const nome    = document.getElementById(`ea-nome-${id}`).value.trim();
-  const local   = document.getElementById(`ea-local-${id}`).value.trim();
-  const data    = document.getElementById(`ea-data-${id}`).value;
-  const hora    = document.getElementById(`ea-hora-${id}`).value;
-  const estado  = document.getElementById(`ea-estado-${id}`).value;
-  const tipo    = document.getElementById(`ea-tipo-${id}`).value;
-  const link    = document.getElementById(`ea-link-${id}`).value.trim();
-  const artista = document.getElementById(`ea-artista-${id}`).value;
+  const nome     = document.getElementById(`ea-nome-${id}`).value.trim();
+  const local    = document.getElementById(`ea-local-${id}`).value.trim();
+  const data     = document.getElementById(`ea-data-${id}`).value;
+  const data_fim = document.getElementById(`ea-data-fim-${id}`).value || null;
+  const hora     = document.getElementById(`ea-hora-${id}`).value;
+  const estado   = document.getElementById(`ea-estado-${id}`).value;
+  const tipo     = document.getElementById(`ea-tipo-${id}`).value;
+  const link     = document.getElementById(`ea-link-${id}`).value.trim();
+  const artista  = document.getElementById(`ea-artista-${id}`).value;
+  const notas    = document.getElementById(`ea-notas-${id}`).value.trim() || null;
   if (!nome || !data) { showToast('Nome e data obrigatórios'); return; }
-  await sb.from('events').update({ nome, local, hora, data, estado, tipo, link, artista }).eq('id', id);
+  await sb.from('events').update({ nome, local, hora, data, data_fim, estado, tipo, link, artista, notas }).eq('id', id);
   editingAgendaId = null;
   showToast('Evento actualizado');
   loadTable('events');
 }
 
 function gcalUrl(e) {
-  // Build Google Calendar "Add to Calendar" URL
   const dateStr = (e.data || '').replace(/-/g, '');
   let dates;
-  if (e.hora) {
-    // Event with time: YYYYMMDDTHHMMSS / +3h end
+  if (e.data_fim && e.data_fim !== e.data) {
+    // Multi-day all-day event
+    const endD = new Date(e.data_fim + 'T00:00:00');
+    endD.setDate(endD.getDate() + 1);
+    dates = `${dateStr}/${endD.toISOString().slice(0,10).replace(/-/g,'')}`;
+  } else if (e.hora) {
     const [hh, mm] = e.hora.split(':').map(Number);
     const pad = n => String(n).padStart(2, '0');
     const start = `${dateStr}T${pad(hh)}${pad(mm)}00`;
     const endHh = (hh + 3) % 24;
-    const end   = `${dateStr}T${pad(endHh)}${pad(mm)}00`;
-    dates = `${start}/${end}`;
+    dates = `${start}/${dateStr}T${pad(endHh)}${pad(mm)}00`;
   } else {
-    // All-day: YYYYMMDD/YYYYMMDD+1
     const d = new Date(e.data + 'T00:00:00');
     d.setDate(d.getDate() + 1);
-    const next = d.toISOString().slice(0,10).replace(/-/g,'');
-    dates = `${dateStr}/${next}`;
+    dates = `${dateStr}/${d.toISOString().slice(0,10).replace(/-/g,'')}`;
   }
-  const params = new URLSearchParams({
-    action: 'TEMPLATE',
-    text: e.nome || '',
-    dates,
-    location: e.local || '',
-    details: e.link ? `Mais info: ${e.link}` : 'Mystic Fyah'
-  });
+  const details = [e.link ? `Mais info: ${e.link}` : '', e.notas || ''].filter(Boolean).join('\n') || 'Mystic Fyah';
+  const params = new URLSearchParams({ action: 'TEMPLATE', text: e.nome || '', dates, location: e.local || '', details });
   return `https://calendar.google.com/calendar/render?${params}`;
 }
 
@@ -1932,11 +1999,28 @@ function renderAgenda() {
   const list = document.getElementById('events-list');
   const count = document.getElementById('agenda-count');
 
-  const upcoming = events.filter(e => e.data >= today()).sort((a,b) => a.data.localeCompare(b.data));
-  const past = events.filter(e => e.data < today()).sort((a,b) => b.data.localeCompare(a.data));
+  const q = (document.getElementById('agenda-search')?.value || '').toLowerCase();
+  const filtered = q
+    ? events.filter(e => (e.nome||'').toLowerCase().includes(q) || (e.local||'').toLowerCase().includes(q))
+    : events;
 
-  count.textContent = `${upcoming.length} próximos · ${events.length} total`;
+  const upcoming = filtered.filter(e => (e.data_fim || e.data) >= today()).sort((a,b) => a.data.localeCompare(b.data));
+  const past     = filtered.filter(e => (e.data_fim || e.data) <  today()).sort((a,b) => b.data.localeCompare(a.data));
+
+  count.textContent = `${upcoming.length} próximos · ${filtered.length} total`;
   setTopbarCount(count.textContent);
+
+  function dateLabelRange(e) {
+    if (!e.data_fim || e.data_fim === e.data) return '';
+    const dEnd = new Date(e.data_fim + 'T00:00:00');
+    return ` → ${String(dEnd.getDate()).padStart(2,'0')} ${MONTHS[dEnd.getMonth()]}`;
+  }
+
+  function typeBadge(tipo) {
+    if (tipo === 'Aluguer Sound System') return '<span style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;background:rgba(34,197,94,0.1);color:#22c55e;border:1px solid rgba(34,197,94,0.25);border-radius:3px;padding:1px 6px;font-weight:600">🔊 Aluguer</span>';
+    if (tipo === 'Festival') return '<span style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;background:rgba(251,191,36,0.12);color:#fbbf24;border:1px solid rgba(251,191,36,0.3);border-radius:3px;padding:1px 6px;font-weight:600">🎪 Festival</span>';
+    return '';
+  }
 
   function renderGroup(label, arr) {
     if (!arr.length) return '';
@@ -1953,13 +2037,17 @@ function renderAgenda() {
               <label>Nome</label>
               <input type="text" id="ea-nome-${e.id}" value="${e.nome.replace(/"/g,'&quot;')}">
             </div>
-            <div class="form-group" style="margin:0">
-              <label>Local</label>
+            <div class="form-group" style="margin:0;grid-column:span 2">
+              <label>Local / Venue</label>
               <input type="text" id="ea-local-${e.id}" value="${(e.local||'').replace(/"/g,'&quot;')}">
             </div>
             <div class="form-group" style="margin:0">
-              <label>Data</label>
+              <label>Data Início</label>
               <input type="date" id="ea-data-${e.id}" value="${e.data||''}">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label>Data Fim</label>
+              <input type="date" id="ea-data-fim-${e.id}" value="${e.data_fim||''}">
             </div>
             <div class="form-group" style="margin:0">
               <label>Hora</label>
@@ -1974,7 +2062,7 @@ function renderAgenda() {
             <div class="form-group" style="margin:0">
               <label>Tipo</label>
               <select id="ea-tipo-${e.id}">
-                ${['Gig','Aluguer Sound System'].map(t=>`<option ${(e.tipo||'Gig')===t?'selected':''}>${t}</option>`).join('')}
+                ${['Gig','Festival','Aluguer Sound System'].map(t=>`<option ${(e.tipo||'Gig')===t?'selected':''}>${t}</option>`).join('')}
               </select>
             </div>
             <div class="form-group" style="margin:0">
@@ -1987,6 +2075,10 @@ function renderAgenda() {
             <div class="form-group" style="margin:0;grid-column:span 2">
               <label>Link</label>
               <input type="url" id="ea-link-${e.id}" value="${(e.link||'').replace(/"/g,'&quot;')}">
+            </div>
+            <div class="form-group" style="margin:0;grid-column:span 2">
+              <label>Notas</label>
+              <textarea id="ea-notas-${e.id}" rows="2" style="resize:vertical">${(e.notas||'').replace(/</g,'&lt;')}</textarea>
             </div>
           </div>
           <div style="display:flex;gap:8px">
@@ -2003,11 +2095,12 @@ function renderAgenda() {
           <div class="event-month">${MONTHS[d.getMonth()]}</div>
         </div>
         <div style="flex:1;min-width:0">
-          <div class="event-name" style="display:flex;align-items:center;gap:6px">
-            ${e.nome}
-            ${e.tipo==='Aluguer Sound System' ? '<span style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;background:rgba(34,197,94,0.1);color:#22c55e;border:1px solid rgba(34,197,94,0.25);border-radius:3px;padding:1px 6px;font-weight:600">🔊 Aluguer</span>' : ''}
+          <div class="event-name" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            ${e.nome}${dateLabelRange(e) ? `<span style="font-size:11px;color:var(--text-muted);font-weight:400">${dateLabelRange(e)}</span>` : ''}
+            ${typeBadge(e.tipo)}
           </div>
           <div class="event-location">${e.local||''}${e.hora ? ' · ' + e.hora : ''}${e.artista ? ' · ' + e.artista : ''}</div>
+          ${e.notas ? `<div class="event-notas">${e.notas.replace(/</g,'&lt;')}</div>` : ''}
         </div>
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           ${statusBadge(e.estado)}
@@ -2021,8 +2114,124 @@ function renderAgenda() {
   }
 
   list.innerHTML = renderGroup('Próximos', upcoming) + renderGroup('Passados', past);
-  if (!events.length) list.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div>Nenhum evento registado.</div>';
+  if (!filtered.length) list.innerHTML = `<div class="empty-state"><div class="empty-icon">📅</div>${q ? 'Nenhum resultado para "'+q+'".' : 'Nenhum evento registado.'}</div>`;
+
+  if (agendaView === 'cal') renderCal();
 }
+
+// ============================================================
+// CALENDAR VIEW
+// ============================================================
+
+function renderCal() {
+  const el = document.getElementById('events-cal');
+  if (!el) return;
+
+  const DAYS = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+  const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+  // first day of month (Mon=0 index)
+  const firstDay = new Date(calYear, calMonth, 1);
+  const lastDay  = new Date(calYear, calMonth + 1, 0);
+  // Mon-based offset (getDay: 0=Sun → 6, 1=Mon → 0)
+  const startOffset = (firstDay.getDay() + 6) % 7;
+  const todayStr = today();
+
+  // Build set of event days for quick lookup
+  // For multi-day events, expand to all days
+  function eventDaysInMonth(e) {
+    const start = e.data;
+    const end   = e.data_fim || e.data;
+    const days  = [];
+    let cur = new Date(start + 'T00:00:00');
+    const endD  = new Date(end  + 'T00:00:00');
+    while (cur <= endD) {
+      const s = cur.toISOString().slice(0,10);
+      if (s.startsWith(`${calYear}-${String(calMonth+1).padStart(2,'0')}`)) days.push(s);
+      cur.setDate(cur.getDate() + 1);
+    }
+    return days;
+  }
+
+  // map: date string → [event, ...]
+  const dayMap = {};
+  events.forEach(e => {
+    eventDaysInMonth(e).forEach(d => {
+      if (!dayMap[d]) dayMap[d] = [];
+      dayMap[d].push(e);
+    });
+  });
+
+  const statusClass = s => ({ Confirmado:'confirmado', Headliner:'headliner', Pendente:'pendente', Cancelado:'cancelado' }[s] || 'pendente');
+
+  // header
+  let html = `
+  <div class="cal-nav">
+    <button onclick="calPrev()">‹</button>
+    <div class="cal-nav-title">${monthNames[calMonth]} ${calYear}</div>
+    <button onclick="calNext()">›</button>
+  </div>
+  <div class="cal-grid">
+    ${DAYS.map(d=>`<div class="cal-dow">${d}</div>`).join('')}`;
+
+  // empty cells before month start
+  for (let i = 0; i < startOffset; i++) {
+    html += `<div class="cal-cell other-month"><div class="cal-cell-day">&nbsp;</div></div>`;
+  }
+
+  for (let day = 1; day <= lastDay.getDate(); day++) {
+    const ds = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const isToday = ds === todayStr;
+    const dayEvents = dayMap[ds] || [];
+    const pills = dayEvents.map(e => {
+      const isMulti = e.data_fim && e.data_fim !== e.data;
+      const isStart = e.data === ds;
+      const isEnd   = e.data_fim === ds;
+      let cls = `cal-pill ${statusClass(e.estado)}`;
+      if (isMulti) cls += isStart ? ' multiday-start' : isEnd ? ' multiday-end' : ' multiday';
+      return `<div class="${cls}" onclick="showEventPopup(${e.id})" title="${e.nome} — ${e.local||''}">${isStart || !isMulti ? e.nome : '&nbsp;'}</div>`;
+    }).join('');
+    html += `<div class="cal-cell${isToday?' today':''}"><div class="cal-cell-day">${day}</div>${pills}</div>`;
+  }
+
+  // trailing empty cells
+  const total = startOffset + lastDay.getDate();
+  const trail = (7 - (total % 7)) % 7;
+  for (let i = 0; i < trail; i++) html += `<div class="cal-cell other-month"><div class="cal-cell-day">&nbsp;</div></div>`;
+
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function calPrev() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCal(); }
+function calNext() { calMonth++; if (calMonth > 11) { calMonth = 0;  calYear++; } renderCal(); }
+
+function showEventPopup(id) {
+  const e = events.find(x => x.id === id);
+  if (!e) return;
+  const dateRange = e.data_fim && e.data_fim !== e.data
+    ? `${e.data} → ${e.data_fim}`
+    : e.data;
+  const html = `
+  <div class="event-popup" id="event-popup" onclick="if(event.target.id==='event-popup')closeEventPopup()">
+    <div class="event-popup-box">
+      <div class="event-popup-title">${e.nome}</div>
+      <div class="event-popup-row"><strong>📍</strong>${e.local||'—'}</div>
+      <div class="event-popup-row"><strong>📆</strong>${dateRange}${e.hora?' · '+e.hora:''}</div>
+      <div class="event-popup-row"><strong>🏷</strong>${e.estado}${e.tipo?' · '+e.tipo:''}</div>
+      ${e.artista?`<div class="event-popup-row"><strong>🎤</strong>${e.artista}</div>`:''}
+      ${e.notas?`<div class="event-popup-row" style="margin-top:8px;font-style:italic">${e.notas.replace(/</g,'&lt;')}</div>`:''}
+      ${e.link?`<div class="event-popup-row" style="margin-top:8px"><a href="${e.link}" target="_blank" style="color:var(--accent-light)">${e.link}</a></div>`:''}
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button class="btn btn-outline btn-sm" onclick="closeEventPopup();startEditAgenda(${e.id})">✎ Editar</button>
+        <a class="btn btn-outline btn-sm" style="text-decoration:none" href="${gcalUrl(e)}" target="_blank">📅 Google Cal</a>
+        <button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="closeEventPopup()">Fechar</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+function closeEventPopup() { document.getElementById('event-popup')?.remove(); }
 
 // ============================================================
 // TAREFAS
