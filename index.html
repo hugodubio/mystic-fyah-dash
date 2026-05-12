@@ -2223,7 +2223,7 @@ function showEventPopup(id) {
       ${e.notas?`<div class="event-popup-row" style="margin-top:8px;font-style:italic">${e.notas.replace(/</g,'&lt;')}</div>`:''}
       ${e.link?`<div class="event-popup-row" style="margin-top:8px"><a href="${e.link}" target="_blank" style="color:var(--accent-light)">${e.link}</a></div>`:''}
       <div style="display:flex;gap:8px;margin-top:16px">
-        <button class="btn btn-outline btn-sm" onclick="closeEventPopup();startEditAgenda(${e.id})">✎ Editar</button>
+        <button class="btn btn-outline btn-sm" onclick="closeEventPopup();setAgendaView('list');startEditAgenda(${e.id})">✎ Editar</button>
         <a class="btn btn-outline btn-sm" style="text-decoration:none" href="${gcalUrl(e)}" target="_blank">📅 Google Cal</a>
         <button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="closeEventPopup()">Fechar</button>
       </div>
